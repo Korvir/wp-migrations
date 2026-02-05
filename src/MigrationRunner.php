@@ -15,7 +15,7 @@ class MigrationRunner
 		$this->wpdb = $wpdb;
 		
 		$this->path = $config['path'] ?? WP_CONTENT_DIR . '/migrations';
-		$table      = $config['table'] ?? 'wp_migrations';
+		$table      = $config['table'] ?? $wpdb->prefix . 'migrations';
 		
 		$this->repo = new MigrationRepository($wpdb, $table);
 	}
