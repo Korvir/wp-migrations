@@ -22,7 +22,7 @@ if ( defined('WP_CLI') && WP_CLI ) {
 	WP_CLI::add_command('migrations reset', ResetCommand::class);
 	WP_CLI::add_command('migrations fresh', FreshCommand::class);
 	
-	\WP_CLI::add_command('migrations stub:publish', PublishStubCommand::class
+	WP_CLI::add_command('migrations stub:publish', PublishStubCommand::class
 	);
 	
 }
