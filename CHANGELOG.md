@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.4
+- Added `stub:publish` command for copy stubs to project.
+- 
 ## 0.2.3
 - Added `--pretend` support for migrate, rollback, reset and fresh
 - Added `rollback --step`

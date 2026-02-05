@@ -53,6 +53,17 @@ class AddMigrationCommand extends WP_CLI_Command {
 		return WP_CONTENT_DIR . '/migrations';
 	}
 	
+	protected function getStubPath(): string
+	{
+		// Project override
+		if (defined('WP_MIGRATIONS_STUB_PATH')) {
+			return rtrim(WP_MIGRATIONS_STUB_PATH, '/');
+		}
+		
+		// Default package stub
+		return dirname(__DIR__, 2) . '/stubs';
+	}
+	
 	/* -------------------------------- */
 	
 	protected function generateFileName( string $name, string $path ): string {
@@ -83,41 +94,21 @@ class AddMigrationCommand extends WP_CLI_Command {
 	
 	/* -------------------------------- */
 	
-	protected function getStub( string $name ): string {
+	protected function getStub(string $name): string
+	{
 		$table = $this->guessTableName($name);
 		
-		return <<<PHP
-<?php
-
-use WPMigrations\\MigrationInterface;
-
-return new class implements MigrationInterface {
-
-	public function up()
-	{
-		global \$wpdb;
-
-		\$table = \$wpdb->prefix . '{$table}';
-		\$charset = \$wpdb->get_charset_collate();
-
-		\$wpdb->query("
-			CREATE TABLE IF NOT EXISTS \$table (
-				id BIGINT UNSIGNED AUTO_INCREMENT,
-				PRIMARY KEY(id)
-			) \$charset
-		");
-	}
-
-	public function down()
-	{
-		global \$wpdb;
-
-		\$table = \$wpdb->prefix . '{$table}';
-
-		\$wpdb->query("DROP TABLE IF EXISTS \$table");
-	}
-};
-PHP;
+		$stubFile = $this->getStubPath() . '/migration.php.stub';
+		if (! file_exists($stubFile)) {
+			throw new \RuntimeException('Migration stub not found.');
+		}
+		$stub = file_get_contents($stubFile);
+		
+		return str_replace(
+			['{{ table }}'],
+			[$table],
+			$stub
+		);
 	}
 	
 }

@@ -35,3 +35,11 @@ Preview pending migrations:
 wp migrations migrate --pretend
 wp migrations rollback --step=2 --pretend
 ```
+
+## Stub publishing
+
+To customize migration templates, you can publish the default stubs:
+```bash
+wp migrations stub:publish
+```
+This will copy stub files into your project, where they can be freely modified.

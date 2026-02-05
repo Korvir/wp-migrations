@@ -1,0 +1,30 @@
+<?php
+
+use WPMigrations\MigrationInterface;
+
+return new class implements MigrationInterface {
+
+	public function up()
+	{
+		global $wpdb;
+
+		$table = $wpdb->prefix . '{{ table }}';
+		$charset = $wpdb->get_charset_collate();
+
+		$wpdb->query("
+			CREATE TABLE IF NOT EXISTS $table (
+				id BIGINT UNSIGNED AUTO_INCREMENT,
+				PRIMARY KEY(id)
+			) $charset
+		");
+	}
+
+	public function down()
+	{
+		global $wpdb;
+
+		$table = $wpdb->prefix . '{{ table }}';
+
+		$wpdb->query("DROP TABLE IF EXISTS $table");
+	}
+};
