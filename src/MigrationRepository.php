@@ -10,7 +10,7 @@ class MigrationRepository
 	public function __construct($wpdb, string $table)
 	{
 		$this->wpdb  = $wpdb;
-		$this->table = $wpdb->prefix . $table;
+		$this->table = $table;
 	}
 	
 	/* -------------------------------- */
