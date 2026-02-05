@@ -79,7 +79,7 @@ class AddMigrationCommand extends WP_CLI_Command
 		return <<<PHP
 <?php
 
-use Korvir\\WPMigrations\\MigrationInterface;
+use WPMigrations\\MigrationInterface;
 
 return new class implements MigrationInterface {
 
