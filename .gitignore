@@ -54,6 +54,7 @@ Thumbs.db
 .DS_Store
 
 # Ignore node/composer dependency directories
+vendor/
 node_modules/
 docker_dir
 package-lock.json

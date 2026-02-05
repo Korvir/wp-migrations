@@ -14,7 +14,7 @@ class MigrationRunner
 		
 		$this->wpdb = $wpdb;
 		
-		$this->path = $config['path'] ?? WP_CONTENT_DIR . '/migrations';
+		$this->path = $this->resolvePath($config);
 		$table      = $config['table'] ?? $wpdb->prefix . 'migrations';
 		
 		$this->repo = new MigrationRepository($wpdb, $table);
@@ -88,5 +88,23 @@ class MigrationRunner
 		}
 		
 		return $out;
+	}
+	
+	
+	protected function resolvePath(array $config): string
+	{
+		if (! empty($config['path'])) {
+			return rtrim($config['path'], '/');
+		}
+		
+		if (defined('WP_MIGRATIONS_PATH')) {
+			return rtrim(WP_MIGRATIONS_PATH, '/');
+		}
+		
+		if (function_exists('get_stylesheet_directory')) {
+			return get_stylesheet_directory() . '/migrations';
+		}
+		
+		return WP_CONTENT_DIR . '/migrations';
 	}
 }

@@ -15,5 +15,8 @@
     "php": ">=7.4"
   },
   "minimum-stability": "dev",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "wp-cli/wp-cli": "^2.12"
+  }
 }

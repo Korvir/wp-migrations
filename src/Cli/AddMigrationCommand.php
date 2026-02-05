@@ -8,7 +8,7 @@ use WP_CLI_Command;
 class AddMigrationCommand extends WP_CLI_Command
 {
 	/**
-	 * Create new migration file.
+	 * Create a new migration file.
 	 *
 	 * ## OPTIONS
 	 *
@@ -47,10 +47,13 @@ class AddMigrationCommand extends WP_CLI_Command
 	
 	protected function getMigrationsPath(): string
 	{
-		// v1 — simplest config strategy
 		
 		if (defined('WP_MIGRATIONS_PATH')) {
-			return WP_MIGRATIONS_PATH;
+			return rtrim(WP_MIGRATIONS_PATH, '/');
+		}
+		
+		if (function_exists('get_stylesheet_directory')) {
+			return get_stylesheet_directory() . '/migrations';
 		}
 		
 		return WP_CONTENT_DIR . '/migrations';
