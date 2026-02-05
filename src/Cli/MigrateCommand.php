@@ -3,6 +3,7 @@
 namespace WPMigrations\Cli;
 
 use Throwable;
+use WP_CLI;
 use WP_CLI_Command;
 use WPMigrations\MigrationRunner;
 
