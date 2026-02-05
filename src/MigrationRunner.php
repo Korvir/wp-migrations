@@ -89,7 +89,6 @@ class MigrationRunner
 	public function rollback(): int
 	{
 		$this->repo->ensureTable();
-		
 		$batch = $this->repo->lastBatch();
 		
 		if (! $batch) {
@@ -97,30 +96,50 @@ class MigrationRunner
 		}
 		
 		$migrations = $this->repo->getMigrationsByBatch($batch);
-		
 		$files = $this->getFiles();
 		
 		$rolledBack = 0;
-		
 		foreach ($migrations as $name) {
 			
 			if (! isset($files[$name])) {
 				throw new \Exception("Migration file missing: {$name}");
 			}
 			
-			\WP_CLI::log("Rolling back: {$name}");
-			
 			$migration = require $files[$name];
-			
 			$migration->down();
-			
 			$this->repo->delete($name);
-			
+
 			$rolledBack++;
 		}
 		
 		return $rolledBack;
 	}
+	
+	/* -------------------------------- */
+	
+	public function rollbackList(): array
+	{
+		$this->repo->ensureTable();
+		$batch = $this->repo->lastBatch();
+		
+		if (! $batch) {
+			return [];
+		}
+		
+		$migrations = $this->repo->getMigrationsByBatch($batch);
+		$files = $this->getFiles();
+		
+		$list = [];
+		foreach ($migrations as $name) {
+			$list[$name] = [
+				'file'  => $files[$name] ?? null,
+				'batch' => $batch,
+			];
+		}
+		
+		return $list;
+	}
+	
 	
 	/* -------------------------------- */
 	
@@ -136,27 +155,22 @@ class MigrationRunner
 	public function status(): array
 	{
 		$this->repo->ensureTable();
-		
 		$files = $this->getFiles();
-		
 		$executed = $this->repo->all();
 		
 		$map = [];
 		
 		// Executed
 		foreach ($executed as $row) {
-			
 			$map[$row['migration']] = [
 				'batch'  => $row['batch'],
-				'status' => 'Ran',
+				'status' => 'Complete',
 			];
 		}
 		
 		// Pending
 		foreach ($files as $name => $file) {
-			
 			if (! isset($map[$name])) {
-				
 				$map[$name] = [
 					'batch'  => null,
 					'status' => 'Pending',
