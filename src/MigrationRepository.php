@@ -45,6 +45,21 @@ class MigrationRepository {
 	
 	/* -------------------------------- */
 	
+	public function lastMigrations(int $limit): array
+	{
+		return $this->wpdb->get_col(
+			$this->wpdb->prepare(
+				"SELECT migration
+				 FROM {$this->table}
+				 ORDER BY id DESC
+				 LIMIT %d",
+				$limit
+			)
+		);
+	}
+	
+	/* -------------------------------- */
+	
 	public function getMigrationsByBatch( int $batch ): array {
 		return $this->wpdb->get_col(
 			$this->wpdb->prepare(

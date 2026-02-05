@@ -113,6 +113,44 @@ class MigrationRunner {
 	
 	/* -------------------------------- */
 	
+	public function rollbackSteps(int $steps): int
+	{
+		$this->repo->ensureTable();
+		
+		if ($steps <= 0) {
+			return 0;
+		}
+		
+		$migrations = $this->repo->lastMigrations($steps);
+		
+		if (empty($migrations)) {
+			return 0;
+		}
+		
+		$files = $this->getFiles();
+		
+		$rolledBack = 0;
+		
+		foreach ($migrations as $name) {
+			
+			if (! isset($files[$name])) {
+				throw new \Exception("Migration file missing: {$name}");
+			}
+			
+			$migration = require $files[$name];
+			
+			$migration->down();
+			
+			$this->repo->delete($name);
+			
+			$rolledBack++;
+		}
+		
+		return $rolledBack;
+	}
+	
+	/* -------------------------------- */
+	
 	public function rollbackList(): array {
 		$this->repo->ensureTable();
 		$batch = $this->repo->lastBatch();
@@ -135,6 +173,27 @@ class MigrationRunner {
 		return $list;
 	}
 	
+	/* -------------------------------- */
+	
+	public function rollbackStepList(int $steps): array
+	{
+		$this->repo->ensureTable();
+		
+		if ($steps <= 0) {
+			return [];
+		}
+		
+		$migrations = $this->repo->lastMigrations($steps);
+		$files = $this->getFiles();
+		
+		$list = [];
+		
+		foreach ($migrations as $name) {
+			$list[$name] = $files[$name] ?? null;
+		}
+		
+		return $list;
+	}
 	
 	/* -------------------------------- */
 	
