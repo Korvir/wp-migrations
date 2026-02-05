@@ -1,0 +1,62 @@
+#=========== GIT IGNORE FOR WORDPRESS SITES ===============#
+# Ignore all files starting with .
+.*
+.htaccess
+
+# Track this file .gitignore (i.e. do NOT ignore it)
+!.gitignore
+!.gitmodules
+
+# Track .editorconfig file (i.e. do NOT ignore it)
+!.editorconfig
+
+# Ignore all files that start with ~
+~*
+
+# Ignore OS generated files
+ehthumbs.db
+Thumbs.db
+
+# Ignore Editor files
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+
+# Ignore log files and databases
+*.log
+*.sql
+*.sqlite
+
+# Ignore compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Ignore packaged files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# IDE project files #
+.idea/
+.vscode/
+.editorconfig
+.eslintignore
+.eslintrc.js
+.DS_Store
+
+# Ignore node/composer dependency directories
+node_modules/
+docker_dir
+package-lock.json
+composer.lock
+
+
