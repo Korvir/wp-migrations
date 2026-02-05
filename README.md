@@ -5,7 +5,7 @@ Simple database migration runner for WordPress via WP-CLI.
 ```bash
 composer require korvir/wp-migrations
 ```
-`
+
 ## Commands
 wp migrations add create_users_table
 wp migrations migrate
@@ -37,7 +37,7 @@ wp migrations rollback --step=2 --pretend
 ```
 
 ## Stub publishing
-
+You need do define the `WP_MIGRATIONS_STUBS_PATH` constant.
 To customize migration templates, you can publish the default stubs:
 ```bash
 wp migrations stub:publish
