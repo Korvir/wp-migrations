@@ -98,4 +98,13 @@ class MigrationRepository
 			['migration' => $migration]
 		);
 	}
+	
+	/* -------------------------------- */
+	
+	public function all(): array
+	{
+		return $this->wpdb->get_col(
+			"SELECT migration FROM {$this->table} ORDER BY id ASC"
+		);
+	}
 }

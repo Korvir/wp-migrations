@@ -20,15 +20,12 @@ class MigrationRunner
 		$this->repo = new MigrationRepository($wpdb, $table);
 	}
 	
-	/* -------------------------------- */
 	
-	public function migrate(?string $target = null): int
+	public function pending(?string $target = null): array
 	{
 		$this->repo->ensureTable();
 		
-		$batch = $this->repo->nextBatch();
-		
-		$executed = 0;
+		$pending = [];
 		
 		foreach ($this->getFiles() as $name => $file) {
 			
@@ -40,7 +37,29 @@ class MigrationRunner
 				continue;
 			}
 			
-			\WP_CLI::log("Migrating: {$name}");
+			$pending[$name] = $file;
+		}
+		
+		return $pending;
+	}
+	
+	/* -------------------------------- */
+	
+	public function migrate(?string $target = null): int
+	{
+		$this->repo->ensureTable();
+		
+		$pending = $this->pending($target);
+		
+		if (empty($pending)) {
+			return 0;
+		}
+		
+		$batch = $this->repo->nextBatch();
+		
+		$executed = 0;
+		
+		foreach ($pending as $name => $file) {
 			
 			$migration = require $file;
 			
@@ -96,6 +115,14 @@ class MigrationRunner
 		return $rolledBack;
 	}
 	
+	/* -------------------------------- */
+	
+	public function executed(): array
+	{
+		$this->repo->ensureTable();
+		
+		return $this->repo->all();
+	}
 	
 	/* -------------------------------- */
 	

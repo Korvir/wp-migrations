@@ -27,13 +27,20 @@ class MigrateCommand extends WP_CLI_Command
 		
 		$runner = new MigrationRunner();
 		
-		$count = $runner->migrate($name);
+		$pending = $runner->pending($name);
 		
-		if ($count === 0) {
-			WP_CLI::success('Nothing to migrate.');
+		if (empty($pending)) {
+			\WP_CLI::success('Nothing to migrate.');
 			return;
 		}
 		
-		WP_CLI::success("Migrations executed: {$count}");
+		foreach (array_keys($pending) as $migration) {
+			\WP_CLI::log("Migrating: {$migration}");
+		}
+		
+		$count = $runner->migrate($name);
+		
+		\WP_CLI::success("Migrations executed: {$count}");
 	}
+	
 }
