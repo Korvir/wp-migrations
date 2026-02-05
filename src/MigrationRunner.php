@@ -22,9 +22,11 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	public function migrate(?string $target = null): void
+	public function migrate(?string $target = null): int
 	{
 		$this->repo->ensureTable();
+		
+		$executed = 0;
 		
 		foreach ($this->getFiles() as $name => $file) {
 			
@@ -36,6 +38,8 @@ class MigrationRunner
 				continue;
 			}
 			
+			\WP_CLI::log("Migrating: {$name}");
+			
 			$migration = require $file;
 			
 			if (! $migration instanceof MigrationInterface) {
@@ -45,7 +49,11 @@ class MigrationRunner
 			$migration->up();
 			
 			$this->repo->log($name);
+			
+			$executed++;
 		}
+		
+		return $executed;
 	}
 	
 	/* -------------------------------- */
@@ -76,6 +84,10 @@ class MigrationRunner
 	
 	protected function getFiles(): array
 	{
+		if (! is_dir($this->path)) {
+			return [];
+		}
+		
 		$files = glob($this->path . '/*.php');
 		
 		sort($files);
