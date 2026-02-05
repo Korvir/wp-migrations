@@ -151,6 +151,45 @@ class MigrationRunner {
 	
 	/* -------------------------------- */
 	
+	public function reset(): int
+	{
+		$this->repo->ensureTable();
+		
+		$total = 0;
+		
+		while ($this->repo->lastBatch()) {
+			$total += $this->rollback();
+		}
+		
+		return $total;
+	}
+	
+	public function resetList(): array
+	{
+		$this->repo->ensureTable();
+		
+		$files = $this->getFiles();
+		$executed = $this->repo->all();
+		
+		$list = [];
+		
+		// reverse execution order
+		for ($i = count($executed) - 1; $i >= 0; $i--) {
+			$name = $executed[$i]['migration'];
+			
+			$list[] = [
+				'migration' => $name,
+				'batch'     => $executed[$i]['batch'],
+				'file'      => $files[$name] ?? null,
+			];
+		}
+		
+		return $list;
+	}
+	
+	
+	/* -------------------------------- */
+	
 	public function rollbackList(): array {
 		$this->repo->ensureTable();
 		$batch = $this->repo->lastBatch();
