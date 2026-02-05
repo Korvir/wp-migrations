@@ -2,12 +2,12 @@
 
 namespace WPMigrations\Cli;
 
-use WPMigrations\MigrationRunner;
+use Exception;
 use WP_CLI;
 use WP_CLI_Command;
+use WPMigrations\MigrationRunner;
 
-class RollbackCommand extends WP_CLI_Command
-{
+class RollbackCommand extends WP_CLI_Command {
 	/**
 	 * Rollback last migration batch.
 	 *
@@ -15,15 +15,14 @@ class RollbackCommand extends WP_CLI_Command
 	 *
 	 *     wp migrations rollback
 	 *
-	 * @throws \Exception
+	 * @throws Exception
 	 */
-	public function __invoke($args, $assoc_args)
-	{
+	public function __invoke( $args, $assoc_args ) {
 		$runner = new MigrationRunner();
 		
 		$list = $runner->rollbackList();
 		
-		if (empty($list)) {
+		if ( empty($list) ) {
 			WP_CLI::success('Nothing to rollback.');
 			return;
 		}
@@ -33,7 +32,7 @@ class RollbackCommand extends WP_CLI_Command
 		WP_CLI::log("Rolling back batch: {$batch}");
 		WP_CLI::log('');
 		
-		foreach (array_keys($list) as $migration) {
+		foreach ( array_keys($list) as $migration ) {
 			WP_CLI::log("Rolling back: {$migration}");
 		}
 		

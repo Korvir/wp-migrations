@@ -2,21 +2,18 @@
 
 namespace WPMigrations;
 
-class MigrationRepository
-{
+class MigrationRepository {
 	protected $wpdb;
 	protected string $table;
 	
-	public function __construct($wpdb, string $table)
-	{
-		$this->wpdb  = $wpdb;
+	public function __construct( $wpdb, string $table ) {
+		$this->wpdb = $wpdb;
 		$this->table = $table;
 	}
 	
 	/* -------------------------------- */
 	
-	public function ensureTable(): void
-	{
+	public function ensureTable(): void {
 		$this->wpdb->query("
 			CREATE TABLE IF NOT EXISTS {$this->table} (
 				id INT AUTO_INCREMENT,
@@ -30,8 +27,7 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function nextBatch(): int
-	{
+	public function nextBatch(): int {
 		$max = $this->wpdb->get_var(
 			"SELECT MAX(batch) FROM {$this->table}"
 		);
@@ -41,8 +37,7 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function lastBatch(): ?int
-	{
+	public function lastBatch(): ?int {
 		return $this->wpdb->get_var(
 			"SELECT MAX(batch) FROM {$this->table}"
 		);
@@ -50,8 +45,7 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function getMigrationsByBatch(int $batch): array
-	{
+	public function getMigrationsByBatch( int $batch ): array {
 		return $this->wpdb->get_col(
 			$this->wpdb->prepare(
 				"SELECT migration
@@ -65,9 +59,8 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function has(string $migration): bool
-	{
-		return (bool) $this->wpdb->get_var(
+	public function has( string $migration ): bool {
+		return (bool)$this->wpdb->get_var(
 			$this->wpdb->prepare(
 				"SELECT COUNT(*) FROM {$this->table} WHERE migration = %s",
 				$migration
@@ -77,8 +70,7 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function log(string $migration, int $batch): void
-	{
+	public function log( string $migration, int $batch ): void {
 		$this->wpdb->insert(
 			$this->table,
 			[
@@ -91,18 +83,16 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function delete(string $migration): void
-	{
+	public function delete( string $migration ): void {
 		$this->wpdb->delete(
 			$this->table,
-			['migration' => $migration]
+			[ 'migration' => $migration ]
 		);
 	}
 	
 	/* -------------------------------- */
 	
-	public function all(): array
-	{
+	public function all(): array {
 		return $this->wpdb->get_results(
 			"SELECT migration, batch
 			 FROM {$this->table}

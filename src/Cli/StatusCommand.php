@@ -2,12 +2,12 @@
 
 namespace WPMigrations\Cli;
 
-use WPMigrations\MigrationRunner;
 use WP_CLI;
 use WP_CLI_Command;
+use WPMigrations\MigrationRunner;
+use function WP_CLI\Utils\format_items;
 
-class StatusCommand extends WP_CLI_Command
-{
+class StatusCommand extends WP_CLI_Command {
 	/**
 	 * Show migrations status.
 	 *
@@ -15,20 +15,19 @@ class StatusCommand extends WP_CLI_Command
 	 *
 	 *     wp migrations status
 	 */
-	public function __invoke($args, $assoc_args)
-	{
+	public function __invoke( $args, $assoc_args ) {
 		$runner = new MigrationRunner();
 		
 		$status = $runner->status();
 		
-		if (empty($status)) {
+		if ( empty($status) ) {
 			WP_CLI::success('No migrations found.');
 			return;
 		}
 		
 		$table = [];
 		
-		foreach ($status as $name => $row) {
+		foreach ( $status as $name => $row ) {
 			
 			$table[] = [
 				'Migration' => $name,
@@ -37,10 +36,10 @@ class StatusCommand extends WP_CLI_Command
 			];
 		}
 		
-		\WP_CLI\Utils\format_items(
+		format_items(
 			'table',
 			$table,
-			['Migration', 'Batch', 'Status']
+			[ 'Migration', 'Batch', 'Status' ]
 		);
 	}
 }

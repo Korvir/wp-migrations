@@ -5,8 +5,7 @@ namespace WPMigrations\Cli;
 use WP_CLI;
 use WP_CLI_Command;
 
-class AddMigrationCommand extends WP_CLI_Command
-{
+class AddMigrationCommand extends WP_CLI_Command {
 	/**
 	 * Create a new migration file.
 	 *
@@ -19,15 +18,14 @@ class AddMigrationCommand extends WP_CLI_Command
 	 *
 	 *     wp migrations add create_users_table
 	 */
-	public function __invoke($args, $assoc_args)
-	{
+	public function __invoke( $args, $assoc_args ) {
 		$name = $args[0] ?? null;
-		if (! $name) {
+		if ( !$name ) {
 			WP_CLI::error('Migration name required.');
 		}
 		
 		$path = $this->getMigrationsPath();
-		if (! is_dir($path)) {
+		if ( !is_dir($path) ) {
 			mkdir($path, 0755, true);
 		}
 		
@@ -42,14 +40,13 @@ class AddMigrationCommand extends WP_CLI_Command
 	
 	/* -------------------------------- */
 	
-	protected function getMigrationsPath(): string
-	{
+	protected function getMigrationsPath(): string {
 		
-		if (defined('WP_MIGRATIONS_PATH')) {
+		if ( defined('WP_MIGRATIONS_PATH') ) {
 			return rtrim(WP_MIGRATIONS_PATH, '/');
 		}
 		
-		if (function_exists('get_stylesheet_directory')) {
+		if ( function_exists('get_stylesheet_directory') ) {
 			return get_stylesheet_directory() . '/migrations';
 		}
 		
@@ -58,8 +55,7 @@ class AddMigrationCommand extends WP_CLI_Command
 	
 	/* -------------------------------- */
 	
-	protected function generateFileName(string $name, string $path): string
-	{
+	protected function generateFileName( string $name, string $path ): string {
 		$timestamp = date('Y_m_d_His');
 		$slug = strtolower(
 			preg_replace('/[^a-z0-9_]+/i', '_', $name)
@@ -77,19 +73,17 @@ class AddMigrationCommand extends WP_CLI_Command
 	 *
 	 * @return string The derived table name, such as "users" or "orders". Defaults to "table_name" if the name cannot be processed.
 	 */
-	protected function guessTableName( string $name): string
-	{
+	protected function guessTableName( string $name ): string {
 		$name = strtolower($name);
 		$name = preg_replace('/^create_/', '', $name);
 		$name = preg_replace('/_table$/', '', $name);
-
-		return $name ?: 'table_name';
+		
+		return $name ? : 'table_name';
 	}
 	
 	/* -------------------------------- */
 	
-	protected function getStub(string $name): string
-	{
+	protected function getStub( string $name ): string {
 		$table = $this->guessTableName($name);
 		
 		return <<<PHP

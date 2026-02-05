@@ -2,42 +2,40 @@
 
 namespace WPMigrations;
 
-class MigrationRunner
-{
+use Exception;
+
+class MigrationRunner {
 	protected $wpdb;
 	protected string $path;
 	protected MigrationRepository $repo;
 	
-	public function __construct(array $config = [])
-	{
+	public function __construct( array $config = [] ) {
 		global $wpdb;
 		
 		$this->wpdb = $wpdb;
-		
 		$this->path = $this->resolvePath($config);
-		$table      = $config['table'] ?? $wpdb->prefix . 'migrations';
+		$table = $config['table'] ?? $wpdb->prefix . 'migrations';
 		
 		$this->repo = new MigrationRepository($wpdb, $table);
 	}
 	
 	
-	public function pending(?string $target = null): array
-	{
+	public function pending( ?string $target = null ): array {
 		$this->repo->ensureTable();
 		
 		$pending = [];
 		
-		foreach ($this->getFiles() as $name => $file) {
+		foreach ( $this->getFiles() as $name => $file ) {
 			
-			if ($target && $target !== $name) {
+			if ( $target && $target !== $name ) {
 				continue;
 			}
 			
-			if ($this->repo->has($name)) {
+			if ( $this->repo->has($name) ) {
 				continue;
 			}
 			
-			$pending[$name] = $file;
+			$pending[ $name ] = $file;
 		}
 		
 		return $pending;
@@ -45,8 +43,7 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	public function migrate(?string $target = null): int
-	{
+	public function migrate( ?string $target = null ): int {
 		global $wpdb;
 		
 		$wpdb->hide_errors();
@@ -55,7 +52,7 @@ class MigrationRunner
 		
 		$pending = $this->pending($target);
 		
-		if (empty($pending)) {
+		if ( empty($pending) ) {
 			return 0;
 		}
 		
@@ -63,15 +60,15 @@ class MigrationRunner
 		
 		$executed = 0;
 		
-		foreach ($pending as $name => $file) {
+		foreach ( $pending as $name => $file ) {
 			$migration = require $file;
-			if (! $migration instanceof MigrationInterface) {
-				throw new \Exception("$name must implement MigrationInterface");
+			if ( !$migration instanceof MigrationInterface ) {
+				throw new Exception("$name must implement MigrationInterface");
 			}
 			
 			$migration->up();
-			if ($wpdb->last_error) {
-				throw new \Exception(
+			if ( $wpdb->last_error ) {
+				throw new Exception(
 					"Migration failed: {$name}\n{$wpdb->last_error}"
 				);
 			}
@@ -82,16 +79,15 @@ class MigrationRunner
 		
 		return $executed;
 	}
-
+	
 	
 	/* -------------------------------- */
 	
-	public function rollback(): int
-	{
+	public function rollback(): int {
 		$this->repo->ensureTable();
 		$batch = $this->repo->lastBatch();
 		
-		if (! $batch) {
+		if ( !$batch ) {
 			return 0;
 		}
 		
@@ -99,16 +95,16 @@ class MigrationRunner
 		$files = $this->getFiles();
 		
 		$rolledBack = 0;
-		foreach ($migrations as $name) {
+		foreach ( $migrations as $name ) {
 			
-			if (! isset($files[$name])) {
-				throw new \Exception("Migration file missing: {$name}");
+			if ( !isset($files[ $name ]) ) {
+				throw new Exception("Migration file missing: {$name}");
 			}
 			
-			$migration = require $files[$name];
+			$migration = require $files[ $name ];
 			$migration->down();
 			$this->repo->delete($name);
-
+			
 			$rolledBack++;
 		}
 		
@@ -117,12 +113,11 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	public function rollbackList(): array
-	{
+	public function rollbackList(): array {
 		$this->repo->ensureTable();
 		$batch = $this->repo->lastBatch();
 		
-		if (! $batch) {
+		if ( !$batch ) {
 			return [];
 		}
 		
@@ -130,9 +125,9 @@ class MigrationRunner
 		$files = $this->getFiles();
 		
 		$list = [];
-		foreach ($migrations as $name) {
-			$list[$name] = [
-				'file'  => $files[$name] ?? null,
+		foreach ( $migrations as $name ) {
+			$list[ $name ] = [
+				'file'  => $files[ $name ] ?? null,
 				'batch' => $batch,
 			];
 		}
@@ -143,8 +138,7 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	public function executed(): array
-	{
+	public function executed(): array {
 		$this->repo->ensureTable();
 		
 		return $this->repo->all();
@@ -152,8 +146,7 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	public function status(): array
-	{
+	public function status(): array {
 		$this->repo->ensureTable();
 		$files = $this->getFiles();
 		$executed = $this->repo->all();
@@ -161,17 +154,17 @@ class MigrationRunner
 		$map = [];
 		
 		// Executed
-		foreach ($executed as $row) {
-			$map[$row['migration']] = [
+		foreach ( $executed as $row ) {
+			$map[ $row['migration'] ] = [
 				'batch'  => $row['batch'],
 				'status' => 'Complete',
 			];
 		}
 		
 		// Pending
-		foreach ($files as $name => $file) {
-			if (! isset($map[$name])) {
-				$map[$name] = [
+		foreach ( $files as $name => $file ) {
+			if ( !isset($map[ $name ]) ) {
+				$map[ $name ] = [
 					'batch'  => null,
 					'status' => 'Pending',
 				];
@@ -185,9 +178,8 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	protected function getFiles(): array
-	{
-		if (! is_dir($this->path)) {
+	protected function getFiles(): array {
+		if ( !is_dir($this->path) ) {
 			return [];
 		}
 		
@@ -197,26 +189,25 @@ class MigrationRunner
 		
 		$out = [];
 		
-		foreach ($files as $file) {
+		foreach ( $files as $file ) {
 			$name = basename($file, '.php');
-			$out[$name] = $file;
+			$out[ $name ] = $file;
 		}
 		
 		return $out;
 	}
 	
 	
-	protected function resolvePath(array $config): string
-	{
-		if (! empty($config['path'])) {
+	protected function resolvePath( array $config ): string {
+		if ( !empty($config['path']) ) {
 			return rtrim($config['path'], '/');
 		}
 		
-		if (defined('WP_MIGRATIONS_PATH')) {
+		if ( defined('WP_MIGRATIONS_PATH') ) {
 			return rtrim(WP_MIGRATIONS_PATH, '/');
 		}
 		
-		if (function_exists('get_stylesheet_directory')) {
+		if ( function_exists('get_stylesheet_directory') ) {
 			return get_stylesheet_directory() . '/migrations';
 		}
 		
