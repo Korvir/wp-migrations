@@ -47,6 +47,10 @@ class MigrationRunner
 	
 	public function migrate(?string $target = null): int
 	{
+		global $wpdb;
+		
+		$wpdb->hide_errors();
+		
 		$this->repo->ensureTable();
 		
 		$pending = $this->pending($target);
@@ -60,15 +64,17 @@ class MigrationRunner
 		$executed = 0;
 		
 		foreach ($pending as $name => $file) {
-			
 			$migration = require $file;
-			
 			if (! $migration instanceof MigrationInterface) {
 				throw new \Exception("$name must implement MigrationInterface");
 			}
 			
 			$migration->up();
-			
+			if ($wpdb->last_error) {
+				throw new \Exception(
+					"Migration failed: {$name}\n{$wpdb->last_error}"
+				);
+			}
 			$this->repo->log($name, $batch);
 			
 			$executed++;
@@ -76,6 +82,7 @@ class MigrationRunner
 		
 		return $executed;
 	}
+
 	
 	/* -------------------------------- */
 	
