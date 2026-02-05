@@ -103,8 +103,11 @@ class MigrationRepository
 	
 	public function all(): array
 	{
-		return $this->wpdb->get_col(
-			"SELECT migration FROM {$this->table} ORDER BY id ASC"
+		return $this->wpdb->get_results(
+			"SELECT migration, batch
+			 FROM {$this->table}
+			 ORDER BY id ASC",
+			ARRAY_A
 		);
 	}
 }

@@ -133,6 +133,44 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
+	public function status(): array
+	{
+		$this->repo->ensureTable();
+		
+		$files = $this->getFiles();
+		
+		$executed = $this->repo->all();
+		
+		$map = [];
+		
+		// Executed
+		foreach ($executed as $row) {
+			
+			$map[$row['migration']] = [
+				'batch'  => $row['batch'],
+				'status' => 'Ran',
+			];
+		}
+		
+		// Pending
+		foreach ($files as $name => $file) {
+			
+			if (! isset($map[$name])) {
+				
+				$map[$name] = [
+					'batch'  => null,
+					'status' => 'Pending',
+				];
+			}
+		}
+		
+		ksort($map);
+		
+		return $map;
+	}
+	
+	/* -------------------------------- */
+	
 	protected function getFiles(): array
 	{
 		if (! is_dir($this->path)) {
