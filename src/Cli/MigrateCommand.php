@@ -9,22 +9,34 @@ use WPMigrations\MigrationRunner;
 
 class MigrateCommand extends WP_CLI_Command {
 	/**
-	 * Run migrations.
+	 * Run pending migrations.
 	 *
 	 * ## OPTIONS
 	 *
 	 * [<name>]
-	 * : Optional migration name.
+	 * : Optional migration name. If provided, only this migration
+	 *   will be executed (if pending).
+	 *
+	 * [--pretend]
+	 * : Show which migrations would be executed
+	 *   without running them.
 	 *
 	 * ## EXAMPLES
 	 *
+	 *     # Run all pending migrations
 	 *     wp migrations migrate
-	 *     wp migrations migrate 2026_02_05_create_users_table
+	 *
+	 *     # Run a specific migration
+	 *     wp migrations migrate create_users_table
+	 *
+	 *     # Preview pending migrations
+	 *     wp migrations migrate --pretend
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$name = $args[0] ?? null;
-		$runner = new MigrationRunner();
+		$pretend = isset($assoc_args['pretend']);
 		
+		$runner = new MigrationRunner();
 		try {
 			$pending = $runner->pending($name);
 			if ( empty($pending) ) {
@@ -32,12 +44,19 @@ class MigrateCommand extends WP_CLI_Command {
 				return;
 			}
 			
+			if ( $pretend ) {
+				WP_CLI::log('Would run migrations:');
+				WP_CLI::log('');
+				foreach ( array_keys($pending) as $migration ) {
+					WP_CLI::log($migration);
+				}
+				return;
+			}
+			
 			foreach ( array_keys($pending) as $migration ) {
 				WP_CLI::log("Migrating: {$migration}");
 			}
-			
 			$count = $runner->migrate($name);
-			
 			WP_CLI::success("Migrations executed: {$count}");
 			
 		} catch ( Throwable $e ) {
