@@ -26,6 +26,8 @@ class MigrationRunner
 	{
 		$this->repo->ensureTable();
 		
+		$batch = $this->repo->nextBatch();
+		
 		$executed = 0;
 		
 		foreach ($this->getFiles() as $name => $file) {
@@ -48,7 +50,7 @@ class MigrationRunner
 			
 			$migration->up();
 			
-			$this->repo->log($name);
+			$this->repo->log($name, $batch);
 			
 			$executed++;
 		}
@@ -58,27 +60,42 @@ class MigrationRunner
 	
 	/* -------------------------------- */
 	
-	public function rollback(?string $target = null): void
+	public function rollback(): int
 	{
-		$files = array_reverse($this->getFiles());
+		$this->repo->ensureTable();
 		
-		foreach ($files as $name => $file) {
+		$batch = $this->repo->lastBatch();
+		
+		if (! $batch) {
+			return 0;
+		}
+		
+		$migrations = $this->repo->getMigrationsByBatch($batch);
+		
+		$files = $this->getFiles();
+		
+		$rolledBack = 0;
+		
+		foreach ($migrations as $name) {
 			
-			if ($target && $target !== $name) {
-				continue;
+			if (! isset($files[$name])) {
+				throw new \Exception("Migration file missing: {$name}");
 			}
 			
-			if (! $this->repo->has($name)) {
-				continue;
-			}
+			\WP_CLI::log("Rolling back: {$name}");
 			
-			$migration = require $file;
+			$migration = require $files[$name];
 			
 			$migration->down();
 			
 			$this->repo->delete($name);
+			
+			$rolledBack++;
 		}
+		
+		return $rolledBack;
 	}
+	
 	
 	/* -------------------------------- */
 	

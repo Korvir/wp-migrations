@@ -21,10 +21,46 @@ class MigrationRepository
 			CREATE TABLE IF NOT EXISTS {$this->table} (
 				id INT AUTO_INCREMENT,
 				migration VARCHAR(255) NOT NULL,
+				batch INT NOT NULL,
 				executed_at DATETIME NOT NULL,
 				PRIMARY KEY(id)
 			)
 		");
+	}
+	
+	/* -------------------------------- */
+	
+	public function nextBatch(): int
+	{
+		$max = $this->wpdb->get_var(
+			"SELECT MAX(batch) FROM {$this->table}"
+		);
+		
+		return $max ? $max + 1 : 1;
+	}
+	
+	/* -------------------------------- */
+	
+	public function lastBatch(): ?int
+	{
+		return $this->wpdb->get_var(
+			"SELECT MAX(batch) FROM {$this->table}"
+		);
+	}
+	
+	/* -------------------------------- */
+	
+	public function getMigrationsByBatch(int $batch): array
+	{
+		return $this->wpdb->get_col(
+			$this->wpdb->prepare(
+				"SELECT migration
+				 FROM {$this->table}
+				 WHERE batch = %d
+				 ORDER BY id DESC",
+				$batch
+			)
+		);
 	}
 	
 	/* -------------------------------- */
@@ -41,12 +77,13 @@ class MigrationRepository
 	
 	/* -------------------------------- */
 	
-	public function log(string $migration): void
+	public function log(string $migration, int $batch): void
 	{
 		$this->wpdb->insert(
 			$this->table,
 			[
 				'migration'   => $migration,
+				'batch'       => $batch,
 				'executed_at' => current_time('mysql'),
 			]
 		);
