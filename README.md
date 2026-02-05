@@ -7,6 +7,7 @@ composer require korvir/wp-migrations
 ```
 
 ## Commands
+```bash
 wp migrations add create_users_table
 wp migrations migrate
 wp migrations rollback
@@ -14,6 +15,7 @@ wp migrations rollback --step=1
 wp migrations status
 wp migrations reset
 wp migrations fresh
+```
 
 ## Migration example
 ```bash
