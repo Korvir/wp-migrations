@@ -1,0 +1,16 @@
+{
+  "name": "korvir/wp-migrations",
+  "description": "Simple migration runner for WordPress",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "WPMigrations\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.4"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}
