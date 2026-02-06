@@ -7,6 +7,7 @@ use WP_CLI_Command;
 use WPMigrations\MigrationRunner;
 
 class ResetCommand extends WP_CLI_Command {
+	
 	/**
 	 * Rollback all executed migrations.
 	 *
@@ -26,6 +27,8 @@ class ResetCommand extends WP_CLI_Command {
 	 *
 	 *     # Preview full rollback
 	 *     wp migrations reset --pretend
+	 *
+	 * @throws \Exception
 	 */
 	public function __invoke() {
 		$pretend = isset($assoc_args['pretend']);
@@ -38,6 +41,7 @@ class ResetCommand extends WP_CLI_Command {
 			return;
 		}
 		
+		// ---- Pretend mode ----
 		if ( $pretend ) {
 			WP_CLI::log('Would rollback all migrations:');
 			WP_CLI::log('');

@@ -4,6 +4,7 @@ namespace WPMigrations\Cli;
 
 use Throwable;
 use WP_CLI;
+use WP_CLI\ExitException;
 use WP_CLI_Command;
 use WPMigrations\MigrationRunner;
 
@@ -31,6 +32,8 @@ class MigrateCommand extends WP_CLI_Command {
 	 *
 	 *     # Preview pending migrations
 	 *     wp migrations migrate --pretend
+	 *
+	 * @throws ExitException
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$name = $args[0] ?? null;

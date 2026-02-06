@@ -16,19 +16,17 @@ class StatusCommand extends WP_CLI_Command {
 	 *     wp migrations status
 	 */
 	public function __invoke( $args, $assoc_args ) {
+		
 		$runner = new MigrationRunner();
 		
 		$status = $runner->status();
-		
 		if ( empty($status) ) {
 			WP_CLI::success('No migrations found.');
 			return;
 		}
 		
 		$table = [];
-		
 		foreach ( $status as $name => $row ) {
-			
 			$table[] = [
 				'Migration' => $name,
 				'Batch'     => $row['batch'] ?? '-',
@@ -42,4 +40,5 @@ class StatusCommand extends WP_CLI_Command {
 			[ 'Migration', 'Batch', 'Status' ]
 		);
 	}
+	
 }

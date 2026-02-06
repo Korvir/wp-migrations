@@ -7,6 +7,7 @@ use WP_CLI_Command;
 use WPMigrations\MigrationRunner;
 
 class RollbackCommand extends WP_CLI_Command {
+	
 	/**
 	 * Rollback migrations.
 	 *
@@ -33,6 +34,8 @@ class RollbackCommand extends WP_CLI_Command {
 	 *
 	 *     # Preview rollback of last 3 migrations
 	 *     wp migrations rollback --step=3 --pretend
+	 *
+	 * @throws \Exception
 	 */
 	public function __invoke( $args, $assoc_args ) {
 		$runner = new MigrationRunner();
