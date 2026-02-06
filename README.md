@@ -1,4 +1,4 @@
-# korvir/wp-migrations
+# Simple WP Migrations
 Simple database migration runner for WordPress via WP-CLI.
 
 ## Install
