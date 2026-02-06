@@ -2,7 +2,7 @@
 
 ## 0.2.5
 - Documentation updates
-- 
+
 ## 0.2.4
 - Added `stub:publish` command for copy stubs to project.
 
