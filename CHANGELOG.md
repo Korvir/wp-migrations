@@ -7,7 +7,7 @@
 - Added `stub:publish` command for copy stubs to project.
 
 ## 0.2.3
-- Added `--pretend` support for migrate, rollback, reset and fresh
+- Added `--pretend` support for migrate, rollback, reset and fresh commands
 - Added `rollback --step`
 - Added `reset` and `fresh` commands
 - Improved CLI output and inspection commands
