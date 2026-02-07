@@ -1,6 +1,6 @@
 <?php
 
-use WPMigrations\Schema;
+use WPMigrations\Schema\Schema;
 
 return new class
 {
@@ -12,4 +12,5 @@ return new class
 	public function down() {
 		//
 	}
+	
 };

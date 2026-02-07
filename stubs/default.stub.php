@@ -1,7 +1,7 @@
 <?php
 
-use WPMigrations\Schema;
-use WPMigrations\Blueprint;
+use WPMigrations\Schema\Schema;
+use WPMigrations\Schema\Blueprint;
 
 return new class
 {
@@ -13,4 +13,5 @@ return new class
 	public function down() {
 		//
 	}
+	
 };

@@ -1,7 +1,7 @@
 <?php
 
-use WPMigrations\Schema;
-use WPMigrations\Blueprint;
+use WPMigrations\Schema\Blueprint;
+use WPMigrations\Schema\Schema;
 
 return new class
 {
@@ -17,4 +17,5 @@ return new class
 			//
 		});
 	}
+	
 };
