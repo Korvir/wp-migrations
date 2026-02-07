@@ -92,10 +92,27 @@ final class SqlCompiler {
 		
 		// 3) ADD COLUMN
 		foreach ( $blueprint->getColumns() as $column ) {
+			
+			if ( $column->isChange() )
+				continue;
+			
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nADD COLUMN %s;",
 				$table,
 				$this->compileAlterAddColumn($column)
+			);
+		}
+		
+		// CHANGE COLUMN
+		foreach ( $blueprint->getColumns() as $column ) {
+			if ( !$column->isChange() ) {
+				continue;
+			}
+			
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nMODIFY %s;",
+				$table,
+				$this->compileAlterChangeColumn($column)
 			);
 		}
 		
@@ -217,6 +234,45 @@ final class SqlCompiler {
 	
 	
 	protected function compileAlterAddColumn( Column $column ): string {
+		$parts = [];
+		
+		// column name
+		$parts[] = $column->getName();
+		
+		// type
+		$parts[] = $this->compileColumnType($column);
+		
+		// unsigned
+		if ( $column->isUnsigned() ) {
+			$parts[] = 'UNSIGNED';
+		}
+		
+		// nullability
+		$parts[] = $column->isNullable() ? 'NULL' : 'NOT NULL';
+		
+		// default
+		if ( $column->getDefault() !== null ) {
+			$parts[] = 'DEFAULT ' . $this->compileDefault($column->getDefault());
+		}
+		
+		// auto increment
+		if ( $column->isAutoIncrement() ) {
+			$parts[] = 'AUTO_INCREMENT';
+		}
+		
+		// position
+		if ( $column->isFirst() ) {
+			$parts[] = 'FIRST';
+		}
+		elseif ( $column->getAfter() ) {
+			$parts[] = 'AFTER ' . $column->getAfter();
+		}
+		
+		return implode(' ', $parts);
+	}
+	
+	
+	protected function compileAlterChangeColumn( Column $column ): string {
 		$sql = [];
 		
 		// name
