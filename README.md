@@ -45,6 +45,15 @@ the table default charset and collation only.
 Existing columns and data are not modified.
 
 
+### Index naming
+Primary keys are unnamed.
+
+Unique and non-unique indexes may be named explicitly.
+If an index name is not provided, MySQL will generate one automatically.
+
+To drop an index, you must know its name.
+
+
 ## Stub publishing
 You need do define the `WP_MIGRATIONS_STUBS_PATH` constant.
 To customize migration templates, you can publish the default stubs:

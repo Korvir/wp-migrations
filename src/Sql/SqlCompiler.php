@@ -386,25 +386,31 @@ final class SqlCompiler {
 	}
 	
 	protected function compileUniqueKey( Index $index ): string {
-		$name = $index->getName()
-			? ' ' . $index->getName()
-			: '';
+		if ($index->getName()) {
+			return sprintf(
+				'CONSTRAINT %s UNIQUE (%s)',
+				$index->getName(),
+				implode(', ', $index->getColumns())
+			);
+		}
 		
 		return sprintf(
-			'UNIQUE%s (%s)',
-			$name,
+			'UNIQUE (%s)',
 			implode(', ', $index->getColumns())
 		);
 	}
 	
 	protected function compileIndex( Index $index ): string {
-		$name = $index->getName()
-			? ' ' . $index->getName()
-			: '';
+		if ($index->getName()) {
+			return sprintf(
+				'INDEX %s (%s)',
+				$index->getName(),
+				implode(', ', $index->getColumns())
+			);
+		}
 		
 		return sprintf(
-			'INDEX%s (%s)',
-			$name,
+			'INDEX (%s)',
 			implode(', ', $index->getColumns())
 		);
 	}
