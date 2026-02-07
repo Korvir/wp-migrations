@@ -149,6 +149,10 @@ final class Blueprint {
 		$this->droppedIndexes[] = $name;
 	}
 	
+	public function dropUnique(string $name): void {
+		$this->droppedIndexes[] = $name;
+	}
+	
 	public function shouldDropPrimary(): bool {
 		return $this->dropPrimary;
 	}

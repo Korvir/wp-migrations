@@ -1,6 +1,8 @@
 <?php
 
 use WPMigrations\MigrationInterface;
+use WPMigrations\Schema\Blueprint;
+use WPMigrations\Schema\Schema;
 
 return new class implements MigrationInterface {
 
