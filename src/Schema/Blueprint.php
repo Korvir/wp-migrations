@@ -40,6 +40,18 @@ final class Blueprint {
 	
 	// ---------- columns (add) ----------
 	
+	public function id( string $name = 'id' ): Column {
+		$column = $this->bigInteger($name)
+			->unsigned()
+			->autoIncrement();
+		$this->primary($name);
+		return $column;
+	}
+	
+	public function bigInteger( string $name ): Column {
+		return $this->addColumn('bigInteger', $name);
+	}
+	
 	public function string( string $name, int $length = 255 ): Column {
 		return $this->addColumn('string', $name, $length);
 	}
