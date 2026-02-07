@@ -38,6 +38,13 @@ wp migrations migrate --pretend
 wp migrations rollback --step=2 --pretend
 ```
 
+### Charset & Collation
+In `Schema::table()`, `charset()` and `collation()` change
+the table default charset and collation only.
+
+Existing columns and data are not modified.
+
+
 ## Stub publishing
 You need do define the `WP_MIGRATIONS_STUBS_PATH` constant.
 To customize migration templates, you can publish the default stubs:

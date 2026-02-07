@@ -164,7 +164,25 @@ final class SqlCompiler {
 			);
 		}
 		
-		// TODO
+		// UPDATE TABLE CHARSET / COLLATION
+		if (
+			$context->getCharset() !== null ||
+			$context->getCollation() !== null
+		) {
+			$clauses = [];
+			if ( $context->getCharset() ) {
+				$clauses[] = 'DEFAULT CHARSET=' . $context->getCharset();
+			}
+			if ( $context->getCollation() ) {
+				$clauses[] = 'COLLATE=' . $context->getCollation();
+			}
+			
+			$sql[] = sprintf(
+				"ALTER TABLE %s\n%s;",
+				$table,
+				implode("\n", $clauses)
+			);
+		}
 		
 		return $sql;
 	}
