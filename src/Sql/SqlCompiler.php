@@ -223,16 +223,71 @@ final class SqlCompiler {
 		$type = $column->getType();
 		$args = $column->getArgs();
 		
-		switch ( $type ) {
-			case 'string':
-				$length = $args[0] ?? 255;
-				return "VARCHAR({$length})";
+		switch ($type) {
+			
+			// numeric
+			case 'tinyInteger':
+				return 'TINYINT';
+			
+			case 'smallInteger':
+				return 'SMALLINT';
+			
+			case 'mediumInteger':
+				return 'MEDIUMINT';
 			
 			case 'integer':
 				return 'INT';
 			
 			case 'bigInteger':
 				return 'BIGINT';
+			
+			case 'decimal':
+				$precision = $args[0] ?? 8;
+				$scale = $args[1] ?? 2;
+				return "DECIMAL({$precision},{$scale})";
+			
+			case 'float':
+				return 'FLOAT';
+			
+			case 'double':
+				return 'DOUBLE';
+			
+			case 'boolean':
+				return 'TINYINT(1)';
+			
+			// string / binary
+			case 'char':
+				$length = $args[0] ?? 1;
+				return "CHAR({$length})";
+			
+			case 'string':
+				$length = $args[0] ?? 255;
+				return "VARCHAR({$length})";
+			
+			case 'text':
+				return 'TEXT';
+			
+			case 'mediumText':
+				return 'MEDIUMTEXT';
+			
+			case 'longText':
+				return 'LONGTEXT';
+			
+			case 'binary':
+				return 'BLOB';
+			
+			// date / time
+			case 'date':
+				return 'DATE';
+			
+			case 'time':
+				return 'TIME';
+			
+			case 'dateTime':
+				return 'DATETIME';
+			
+			case 'timestamp':
+				return 'TIMESTAMP';
 			
 			default:
 				throw new RuntimeException("Unsupported column type [{$type}]");

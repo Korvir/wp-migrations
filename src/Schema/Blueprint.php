@@ -37,7 +37,7 @@ final class Blueprint {
 		$this->context->setCollation($collation);
 	}
 	
-	// ---------- columns (add) ----------
+	// ---------- columns ----------
 	
 	public function id( string $name = 'id' ): Column {
 		$column = $this->bigInteger($name)
@@ -47,17 +47,89 @@ final class Blueprint {
 		return $column;
 	}
 	
-	public function bigInteger( string $name ): Column {
+	public function tinyInteger(string $name): Column {
+		return $this->addColumn('tinyInteger', $name);
+	}
+	
+	public function smallInteger(string $name): Column {
+		return $this->addColumn('smallInteger', $name);
+	}
+	
+	public function mediumInteger(string $name): Column {
+		return $this->addColumn('mediumInteger', $name);
+	}
+	
+	public function integer(string $name): Column {
+		return $this->addColumn('integer', $name);
+	}
+	
+	public function bigInteger(string $name): Column {
 		return $this->addColumn('bigInteger', $name);
 	}
 	
-	public function string( string $name, int $length = 255 ): Column {
+	public function decimal(string $name, int $precision = 8, int $scale = 2): Column {
+		return $this->addColumn('decimal', $name, $precision, $scale);
+	}
+	
+	public function float(string $name): Column {
+		return $this->addColumn('float', $name);
+	}
+	
+	public function double(string $name): Column {
+		return $this->addColumn('double', $name);
+	}
+	
+	public function boolean(string $name): Column {
+		return $this->addColumn('boolean', $name);
+	}
+	
+	public function char(string $name, int $length = 1): Column {
+		return $this->addColumn('char', $name, $length);
+	}
+	
+	public function string(string $name, int $length = 255): Column {
 		return $this->addColumn('string', $name, $length);
 	}
 	
-	public function integer( string $name ): Column {
-		return $this->addColumn('integer', $name);
+	public function text(string $name): Column {
+		return $this->addColumn('text', $name);
 	}
+	
+	public function mediumText(string $name): Column {
+		return $this->addColumn('mediumText', $name);
+	}
+	
+	public function longText(string $name): Column {
+		return $this->addColumn('longText', $name);
+	}
+	
+	public function binary(string $name): Column {
+		return $this->addColumn('binary', $name);
+	}
+	
+	public function date(string $name): Column {
+		return $this->addColumn('date', $name);
+	}
+	
+	public function time(string $name): Column {
+		return $this->addColumn('time', $name);
+	}
+	
+	public function dateTime(string $name): Column {
+		return $this->addColumn('dateTime', $name);
+	}
+	
+	public function timestamp(string $name): Column {
+		return $this->addColumn('timestamp', $name);
+	}
+	
+	public function timestamps(): void
+	{
+		$this->timestamp('created_at')->nullable();
+		$this->timestamp('updated_at')->nullable();
+	}
+	
+	
 	
 	// TODO: остальные типы добавишь аналогично
 	
