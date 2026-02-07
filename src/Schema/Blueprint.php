@@ -17,8 +17,12 @@ final class Blueprint {
 	protected array $droppedColumns = [];
 	protected array $renamedColumns = [];
 	
+	protected ?Index $primary = null;
+	protected array $uniqueIndexes = [];
 	protected array $indexes = [];
 	protected array $droppedIndexes = [];
+	
+	
 	
 	public function __construct( string $table, string $mode ) {
 		$this->context = new TableContext($table, $mode);
@@ -44,7 +48,7 @@ final class Blueprint {
 		return $this->addColumn('integer', $name);
 	}
 	
-	// (остальные типы добавишь аналогично)
+	// TODO: остальные типы добавишь аналогично
 	
 	protected function addColumn( string $type, string $name, ...$args ): Column {
 		$column = new Column($name, $type, $args);
@@ -52,6 +56,21 @@ final class Blueprint {
 		
 		return $column;
 	}
+	
+	
+	// ---------- Indexes ----------
+	public function primary( $columns ): void {
+		$this->primary = new Index('primary', (array)$columns);
+	}
+	
+	public function unique( $columns, ?string $name = null ): void {
+		$this->uniqueIndexes[] = new Index('unique', (array)$columns, $name);
+	}
+	
+	public function index( $columns, ?string $name = null ): void {
+		$this->indexes[] = new Index('index', (array)$columns, $name);
+	}
+	
 	
 	// ---------- change ----------
 	
@@ -96,5 +115,23 @@ final class Blueprint {
 	public function getRenamedColumns(): array {
 		return $this->renamedColumns;
 	}
+	
+	public function getPrimary(): ?Index {
+		return $this->primary;
+	}
+	
+	public function getUniqueIndexes(): array {
+		return $this->uniqueIndexes;
+	}
+	
+	public function getIndexes(): array {
+		return $this->indexes;
+	}
+	
+	
+
+	
+
+	
 }
 
