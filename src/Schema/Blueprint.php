@@ -62,7 +62,10 @@ final class Blueprint {
 	
 	// ---------- destructive ----------
 	
-	public function dropColumn( string|array $columns ): void {
+	/**
+	 * @param string|string[] $columns
+	 */
+	public function dropColumn( $columns ): void {
 		foreach ( (array)$columns as $column ) {
 			$this->droppedColumns[] = $column;
 		}

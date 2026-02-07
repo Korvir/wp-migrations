@@ -38,7 +38,7 @@ final class Column {
 		return $this;
 	}
 	
-	public function default( mixed $value ): self {
+	public function default( $value ): self {
 		$this->default = $value;
 		return $this;
 	}
