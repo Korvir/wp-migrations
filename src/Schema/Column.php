@@ -9,13 +9,15 @@ final class Column {
 	
 	protected bool $nullable = false;
 	protected bool $unsigned = false;
-	protected bool $autoIncrement = false;
 	protected bool $isChange = false;
 	
-	protected mixed $default = null;
+	protected $default = null;
 	
 	protected ?string $after = null;
 	protected bool $first = false;
+	
+	protected bool $autoIncrement = false;
+	protected bool $dropAutoIncrement = false;
 	
 	public function __construct( string $name, string $type, array $args = [] ) {
 		$this->name = $name;
@@ -43,11 +45,6 @@ final class Column {
 		return $this;
 	}
 	
-	public function autoIncrement(): self {
-		$this->autoIncrement = true;
-		return $this;
-	}
-	
 	public function after( string $column ): self {
 		$this->after = $column;
 		return $this;
@@ -65,24 +62,59 @@ final class Column {
 	
 	// --- getters for compiler ---
 	
-	public function isChange(): bool { return $this->isChange; }
+	public function isChange(): bool {
+		return $this->isChange;
+	}
 	
-	public function getName(): string { return $this->name; }
+	public function getName(): string {
+		return $this->name;
+	}
 	
-	public function getType(): string { return $this->type; }
+	public function getType(): string {
+		return $this->type;
+	}
 	
-	public function getArgs(): array { return $this->args; }
+	public function getArgs(): array {
+		return $this->args;
+	}
 	
-	public function isNullable(): bool { return $this->nullable; }
+	public function isNullable(): bool {
+		return $this->nullable;
+	}
 	
-	public function isUnsigned(): bool { return $this->unsigned; }
+	public function isUnsigned(): bool {
+		return $this->unsigned;
+	}
 	
-	public function isAutoIncrement(): bool { return $this->autoIncrement; }
+	public function getDefault() {
+		return $this->default;
+	}
 	
-	public function getDefault(): mixed { return $this->default; }
+	public function getAfter(): ?string {
+		return $this->after;
+	}
 	
-	public function getAfter(): ?string { return $this->after; }
+	public function isFirst(): bool {
+		return $this->first;
+	}
 	
-	public function isFirst(): bool { return $this->first; }
+	public function isAutoIncrement(): bool {
+		return $this->autoIncrement;
+	}
+	
+	public function autoIncrement(): self {
+		$this->autoIncrement = true;
+		return $this;
+	}
+	
+	public function removeAutoIncrement(): self {
+		$this->autoIncrement = false;
+		$this->dropAutoIncrement = true;
+		return $this;
+	}
+	
+	public function shouldDropAutoIncrement(): bool {
+		return $this->dropAutoIncrement;
+	}
 }
 

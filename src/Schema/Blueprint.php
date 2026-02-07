@@ -12,9 +12,6 @@ final class Blueprint {
 	/** @var Column[] */
 	protected array $columns = [];
 	
-	/** @var Column[] */
-	protected array $changedColumns = [];
-	
 	protected array $droppedColumns = [];
 	protected array $renamedColumns = [];
 	
@@ -86,13 +83,6 @@ final class Blueprint {
 	}
 	
 	
-	// ---------- change ----------
-	
-	public function change( Column $column ): void {
-		$column->markAsChange();
-		$this->changedColumns[] = $column;
-	}
-	
 	// ---------- destructive ----------
 	
 	/**
@@ -116,10 +106,6 @@ final class Blueprint {
 	
 	public function getColumns(): array {
 		return $this->columns;
-	}
-	
-	public function getChangedColumns(): array {
-		return $this->changedColumns;
 	}
 	
 	public function getDroppedColumns(): array {
@@ -150,7 +136,7 @@ final class Blueprint {
 		$this->droppedIndexes[] = $name;
 	}
 	
-	public function dropUnique(string $name): void {
+	public function dropUnique( string $name ): void {
 		$this->droppedIndexes[] = $name;
 	}
 	
@@ -162,5 +148,12 @@ final class Blueprint {
 		return $this->droppedIndexes;
 	}
 	
+	public function removeAutoIncrement( string $column ): void {
+		$col = new Column($column, '__auto_increment_only__');
+		$col->markAsChange();
+		$col->dropAutoIncrement();
+		
+		$this->columns[] = $col;
+	}
 }
 
