@@ -128,27 +128,69 @@ class AddMigrationCommand extends WP_CLI_Command {
 	
 	
 	/**
-	 * Retrieves the migration stub content and replaces placeholders with dynamic values.
+	 * Retrieves the contents of a migration stub file with appropriate replacements.
 	 *
-	 * @param string $name The name of the migration, used to guess the table name.
+	 * @param string $name The name of the migration, used to resolve the stub file and perform replacements.
 	 *
-	 * @return string The processed content of the migration stub with placeholders replaced.
-	 * @throws RuntimeException If the migration stub file does not exist.
+	 * @return string The processed stub file contents with replacements applied.
+	 * @throws RuntimeException If the specified stub file does not exist.
 	 */
 	protected function getStub( string $name ): string {
-		$table = $this->guessTableName($name);
 		
-		$stubFile = $this->getStubPath() . '/migration.php.stub';
+		$stubFile = $this->resolveStubFile($name);
 		if ( !file_exists($stubFile) ) {
-			throw new RuntimeException('Migration stub not found.');
+			throw new RuntimeException('Migration stub not found: ' . basename($stubFile));
 		}
+		
 		$stub = file_get_contents($stubFile);
+		$replacements = $this->buildStubReplacements($name);
 		
 		return str_replace(
-			[ '{{ table }}' ],
-			[ $table ],
+			array_keys($replacements),
+			array_values($replacements),
 			$stub
 		);
+	}
+	
+	
+	/* Stubs helpers */
+	
+	protected function resolveStubFile( string $name ): string {
+		$prefix = strtolower(strtok($name, '_'));
+		$map = [
+			'create' => 'create.stub.php',
+			'update' => 'update.stub.php',
+			'rename' => 'rename.stub.php',
+			'drop'   => 'drop.stub.php',
+		];
+		$file = $map[ $prefix ] ?? 'default.stub.php';
+
+		return $this->getStubPath() . '/' . $file;
+	}
+	
+	protected function buildStubReplacements( string $name ): array {
+		$parts = explode('_', strtolower($name));
+		return [
+			'{{ table }}' => $this->guessTableName($name),
+			'{{ from }}'  => $this->guessRenameFrom($parts),
+			'{{ to }}'    => $this->guessRenameTo($parts),
+		];
+	}
+	
+	protected function guessRenameFrom( array $parts ): string {
+		$toIndex = array_search('to', $parts, true);
+		if ( $toIndex === false ) {
+			return '';
+		}
+		return implode('_', array_slice($parts, 1, $toIndex - 1));
+	}
+	
+	protected function guessRenameTo( array $parts ): string {
+		$toIndex = array_search('to', $parts, true);
+		if ( $toIndex === false ) {
+			return '';
+		}
+		return implode('_', array_slice($parts, $toIndex + 1));
 	}
 	
 }
