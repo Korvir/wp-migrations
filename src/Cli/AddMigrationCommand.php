@@ -69,21 +69,27 @@ class AddMigrationCommand extends WP_CLI_Command {
 	
 	
 	/**
-	 * Retrieves the file system path for migration stubs.
+	 * Retrieves the path to the stub files used for generating migrations.
 	 *
-	 * This method determines the stub path by checking if a project-specific
-	 * override is defined using the `WP_MIGRATIONS_STUB_PATH` constant. If not
-	 * defined, it falls back to the default package stub path.
+	 * This method checks if a constant `WP_MIGRATIONS_STUB_PATH` is defined and returns its value,
+	 * ensuring it does not end with a trailing slash. If the constant is not defined, it checks for
+	 * a `migrations/stubs` directory within the active theme's directory. If neither is available,
+	 * it defaults to a `stubs` directory two levels up from the current directory.
 	 *
-	 * @return string The resolved stub path.
+	 * @return string The resolved path to the migration stubs.
 	 */
 	protected function getStubPath(): string {
-		// Project override
 		if ( defined('WP_MIGRATIONS_STUB_PATH') ) {
 			return rtrim(WP_MIGRATIONS_STUB_PATH, '/');
 		}
 		
-		// Default package stub
+		if ( function_exists('get_stylesheet_directory') ) {
+			$project = get_stylesheet_directory() . '/migrations/stubs';
+			if ( is_dir($project) ) {
+				return $project;
+			}
+		}
+		
 		return dirname(__DIR__, 2) . '/stubs';
 	}
 	
@@ -128,21 +134,21 @@ class AddMigrationCommand extends WP_CLI_Command {
 	
 	
 	/**
-	 * Retrieves the contents of a migration stub file with appropriate replacements.
+	 * Retrieve and process the content of a migration stub file.
 	 *
-	 * @param string $name The name of the migration, used to resolve the stub file and perform replacements.
+	 * @param string $name The name of the migration. Used to determine the appropriate stub file and replacements.
 	 *
-	 * @return string The processed stub file contents with replacements applied.
+	 * @return string Processed content of the stub file with placeholders replaced.
 	 * @throws RuntimeException If the specified stub file does not exist.
 	 */
 	protected function getStub( string $name ): string {
-		
 		$stubFile = $this->resolveStubFile($name);
 		if ( !file_exists($stubFile) ) {
 			throw new RuntimeException('Migration stub not found: ' . basename($stubFile));
 		}
 		
 		$stub = file_get_contents($stubFile);
+
 		$replacements = $this->buildStubReplacements($name);
 		
 		return str_replace(
@@ -164,12 +170,13 @@ class AddMigrationCommand extends WP_CLI_Command {
 			'drop'   => 'drop.stub.php',
 		];
 		$file = $map[ $prefix ] ?? 'default.stub.php';
-
+		
 		return $this->getStubPath() . '/' . $file;
 	}
 	
 	protected function buildStubReplacements( string $name ): array {
 		$parts = explode('_', strtolower($name));
+		
 		return [
 			'{{ table }}' => $this->guessTableName($name),
 			'{{ from }}'  => $this->guessRenameFrom($parts),
@@ -182,6 +189,7 @@ class AddMigrationCommand extends WP_CLI_Command {
 		if ( $toIndex === false ) {
 			return '';
 		}
+		
 		return implode('_', array_slice($parts, 1, $toIndex - 1));
 	}
 	
@@ -190,6 +198,7 @@ class AddMigrationCommand extends WP_CLI_Command {
 		if ( $toIndex === false ) {
 			return '';
 		}
+		
 		return implode('_', array_slice($parts, $toIndex + 1));
 	}
 	
