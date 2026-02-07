@@ -147,13 +147,6 @@ final class Blueprint {
 	public function getDroppedIndexes(): array {
 		return $this->droppedIndexes;
 	}
-	
-	public function removeAutoIncrement( string $column ): void {
-		$col = new Column($column, '__auto_increment_only__');
-		$col->markAsChange();
-		$col->dropAutoIncrement();
-		
-		$this->columns[] = $col;
-	}
+
 }
 
