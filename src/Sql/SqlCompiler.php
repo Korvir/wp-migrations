@@ -60,8 +60,24 @@ final class SqlCompiler {
 	}
 	
 	protected function compileAlter( Blueprint $blueprint ): array {
+		$sql = [];
+		
+		$context = $blueprint->getContext();
+		$table = $context->getPrefixedName();
+		
+		// 1) Rename column
+		foreach ( $blueprint->getRenamedColumns() as $rename ) {
+			$sql[] = sprintf(
+				'ALTER TABLE %s RENAME COLUMN %s TO %s;',
+				$table,
+				$rename['from'],
+				$rename['to']
+			);
+		}
+		
 		// TODO
-		return [];
+		
+		return $sql;
 	}
 	
 	
@@ -182,7 +198,6 @@ final class SqlCompiler {
 			implode(', ', $index->getColumns())
 		);
 	}
-	
 	
 	protected function compileUniqueKey( Index $index ): string {
 		$name = $index->getName()
