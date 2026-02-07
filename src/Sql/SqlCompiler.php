@@ -118,7 +118,9 @@ final class SqlCompiler {
 		}
 		
 		
-		// DROP PRIMARY KEY
+		// ===== INDEXES =====
+		
+		// DROP PRIMARY KEY (must be first)
 		if ($blueprint->shouldDropPrimary()) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nDROP PRIMARY KEY;",
@@ -126,7 +128,7 @@ final class SqlCompiler {
 			);
 		}
 		
-		// DROP INDEX
+		// DROP INDEX / UNIQUE
 		foreach ($blueprint->getDroppedIndexes() as $indexName) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nDROP INDEX %s;",
@@ -135,7 +137,7 @@ final class SqlCompiler {
 			);
 		}
 		
-		// ADD PRIMARY KEY
+		// ADD PRIMARY KEY (must be after drop)
 		if ($primary = $blueprint->getPrimary()) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nADD %s;",
