@@ -29,7 +29,7 @@ class PublishStubCommand extends WP_CLI_Command {
 		}
 		
 		
-		$files = glob($source . '/*.stub');
+		$files = glob($source . '/*.stub.php');
 		if ( empty($files) ) {
 			WP_CLI::warning('No stub files found.');
 			return;
@@ -38,7 +38,7 @@ class PublishStubCommand extends WP_CLI_Command {
 		foreach ( $files as $file ) {
 			$destination = $target . '/' . basename($file);
 			if ( file_exists($destination) ) {
-				WP_CLI::log('Skipped: ' . basename($file));
+				WP_CLI::log('Stub already exists, skipping: ' . basename($file));
 				continue;
 			}
 			
