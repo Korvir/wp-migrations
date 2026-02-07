@@ -116,6 +116,50 @@ final class SqlCompiler {
 			);
 		}
 		
+		// DROP PRIMARY KEY
+		if ($blueprint->shouldDropPrimary()) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nDROP PRIMARY KEY;",
+				$table
+			);
+		}
+		
+		// DROP INDEX
+		foreach ($blueprint->getDroppedIndexes() as $indexName) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nDROP INDEX %s;",
+				$table,
+				$indexName
+			);
+		}
+		
+		// ADD PRIMARY KEY
+		if ($primary = $blueprint->getPrimary()) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nADD %s;",
+				$table,
+				$this->compilePrimaryKey($primary)
+			);
+		}
+		
+		// ADD UNIQUE
+		foreach ($blueprint->getUniqueIndexes() as $index) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nADD %s;",
+				$table,
+				$this->compileUniqueKey($index)
+			);
+		}
+		
+		// ADD INDEX
+		foreach ($blueprint->getIndexes() as $index) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nADD %s;",
+				$table,
+				$this->compileIndex($index)
+			);
+		}
+		
 		// TODO
 		
 		return $sql;
@@ -309,6 +353,7 @@ final class SqlCompiler {
 		
 		return implode(' ', $sql);
 	}
+	
 	
 	
 	protected function compilePrimaryKey( Index $index ): string {

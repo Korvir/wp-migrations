@@ -20,8 +20,9 @@ final class Blueprint {
 	protected ?Index $primary = null;
 	protected array $uniqueIndexes = [];
 	protected array $indexes = [];
-	protected array $droppedIndexes = [];
 	
+	protected bool $dropPrimary = false;
+	protected array $droppedIndexes = [];
 	
 	
 	public function __construct( string $table, string $mode ) {
@@ -140,10 +141,22 @@ final class Blueprint {
 		return $this->indexes;
 	}
 	
+	public function dropPrimary(): void {
+		$this->dropPrimary = true;
+	}
 	
-
+	public function dropIndex( string $name ): void {
+		$this->droppedIndexes[] = $name;
+	}
 	
-
+	public function shouldDropPrimary(): bool {
+		return $this->dropPrimary;
+	}
+	
+	public function getDroppedIndexes(): array {
+		return $this->droppedIndexes;
+	}
+	
 	
 }
 
