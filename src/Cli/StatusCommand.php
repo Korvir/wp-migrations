@@ -4,7 +4,7 @@ namespace WPMigrations\Cli;
 
 use WP_CLI;
 use WP_CLI_Command;
-use WPMigrations\MigrationRunner;
+use WPMigrations\Migrations\MigrationRunner;
 use function WP_CLI\Utils\format_items;
 
 class StatusCommand extends WP_CLI_Command {

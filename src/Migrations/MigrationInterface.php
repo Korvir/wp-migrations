@@ -1,6 +1,6 @@
 <?php
 
-namespace WPMigrations;
+namespace WPMigrations\Migrations;
 
 interface MigrationInterface {
 	public function up();
