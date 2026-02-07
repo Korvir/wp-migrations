@@ -131,7 +131,6 @@ final class Blueprint {
 	
 	
 	
-	// TODO: остальные типы добавишь аналогично
 	
 	protected function addColumn( string $type, string $name, ...$args ): Column {
 		$column = new Column($name, $type, $args);
