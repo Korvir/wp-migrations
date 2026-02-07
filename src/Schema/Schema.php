@@ -29,6 +29,29 @@ final class Schema {
 		self::execute($sql);
 	}
 	
+	public static function rename( string $from, string $to ): void {
+		global $wpdb;
+		$from = $wpdb->prefix . $from;
+		$to = $wpdb->prefix . $to;
+		
+		$wpdb->query("RENAME TABLE {$from} TO {$to}");
+	}
+	
+	public static function drop( string $table ): void {
+		global $wpdb;
+		$table = $wpdb->prefix . $table;
+		
+		$wpdb->query("DROP TABLE {$table}");
+	}
+	
+	public static function dropIfExists( string $table ): void {
+		global $wpdb;
+		$table = $wpdb->prefix . $table;
+		
+		$wpdb->query("DROP TABLE IF EXISTS {$table}");
+	}
+	
+	
 	protected static function execute( array $queries ): void {
 		if ( !self::$db ) {
 			global $wpdb;
