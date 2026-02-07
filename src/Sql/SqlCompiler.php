@@ -65,13 +65,28 @@ final class SqlCompiler {
 		$context = $blueprint->getContext();
 		$table = $context->getPrefixedName();
 		
-		// 1) Rename column
+		// 1) RENAME COLUMN
 		foreach ( $blueprint->getRenamedColumns() as $rename ) {
 			$sql[] = sprintf(
 				'ALTER TABLE %s RENAME COLUMN %s TO %s;',
 				$table,
 				$rename['from'],
 				$rename['to']
+			);
+		}
+		
+		// 2) DROP COLUMN (batch)
+		$dropped = $blueprint->getDroppedColumns();
+		if (! empty($dropped)) {
+			$clauses = [];
+			foreach ($dropped as $column) {
+				$clauses[] = 'DROP COLUMN ' . $column;
+			}
+			
+			$sql[] = sprintf(
+				"ALTER TABLE %s\n%s;",
+				$table,
+				implode(",\n", $clauses)
 			);
 		}
 		
