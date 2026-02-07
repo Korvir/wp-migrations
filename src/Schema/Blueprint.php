@@ -2,6 +2,7 @@
 
 namespace WPMigrations\Schema;
 
+
 final class Blueprint {
 	public const MODE_CREATE = 'create';
 	public const MODE_ALTER = 'alter';
@@ -160,7 +161,6 @@ final class Blueprint {
 	public function getDroppedIndexes(): array {
 		return $this->droppedIndexes;
 	}
-	
 	
 }
 

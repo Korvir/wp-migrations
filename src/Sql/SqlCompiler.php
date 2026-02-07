@@ -8,6 +8,7 @@ use WPMigrations\Schema\Column;
 use WPMigrations\Schema\Index;
 use WPMigrations\Schema\TableContext;
 
+
 final class SqlCompiler {
 	
 	public function compile( Blueprint $blueprint ): array {
@@ -115,6 +116,7 @@ final class SqlCompiler {
 				$this->compileAlterChangeColumn($column)
 			);
 		}
+		
 		
 		// DROP PRIMARY KEY
 		if ($blueprint->shouldDropPrimary()) {
