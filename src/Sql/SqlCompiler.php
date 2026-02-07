@@ -77,9 +77,9 @@ final class SqlCompiler {
 		
 		// 2) DROP COLUMN (batch)
 		$dropped = $blueprint->getDroppedColumns();
-		if (! empty($dropped)) {
+		if ( !empty($dropped) ) {
 			$clauses = [];
-			foreach ($dropped as $column) {
+			foreach ( $dropped as $column ) {
 				$clauses[] = 'DROP COLUMN ' . $column;
 			}
 			
@@ -87,6 +87,15 @@ final class SqlCompiler {
 				"ALTER TABLE %s\n%s;",
 				$table,
 				implode(",\n", $clauses)
+			);
+		}
+		
+		// 3) ADD COLUMN
+		foreach ( $blueprint->getColumns() as $column ) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nADD COLUMN %s;",
+				$table,
+				$this->compileAlterAddColumn($column)
 			);
 		}
 		
@@ -204,6 +213,45 @@ final class SqlCompiler {
 		}
 		
 		return $sql;
+	}
+	
+	
+	protected function compileAlterAddColumn( Column $column ): string {
+		$sql = [];
+		
+		// name
+		$sql[] = $column->getName();
+		
+		// type
+		$sql[] = $this->compileColumnType($column);
+		
+		// unsigned
+		if ( $column->isUnsigned() ) {
+			$sql[] = 'UNSIGNED';
+		}
+		
+		// nullability
+		$sql[] = $column->isNullable() ? 'NULL' : 'NOT NULL';
+		
+		// default
+		if ( $column->getDefault() !== null ) {
+			$sql[] = 'DEFAULT ' . $this->compileDefault($column->getDefault());
+		}
+		
+		// auto increment
+		if ( $column->isAutoIncrement() ) {
+			$sql[] = 'AUTO_INCREMENT';
+		}
+		
+		// position
+		if ( $column->isFirst() ) {
+			$sql[] = 'FIRST';
+		}
+		elseif ( $column->getAfter() ) {
+			$sql[] = 'AFTER ' . $column->getAfter();
+		}
+		
+		return implode(' ', $sql);
 	}
 	
 	
