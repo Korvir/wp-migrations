@@ -35,6 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
     - `autoIncrement`, `removeAutoIncrement`
     - `first`, `after`
     - `change`
+    - `comment`
+    - `charset`
+    - `collation`
 - Indexes:
     - `primary`
     - `unique` (named and unnamed)

@@ -121,7 +121,7 @@ final class SqlCompiler {
 		// ===== INDEXES =====
 		
 		// DROP PRIMARY KEY (must be first)
-		if ($blueprint->shouldDropPrimary()) {
+		if ( $blueprint->shouldDropPrimary() ) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nDROP PRIMARY KEY;",
 				$table
@@ -129,7 +129,7 @@ final class SqlCompiler {
 		}
 		
 		// DROP INDEX / UNIQUE
-		foreach ($blueprint->getDroppedIndexes() as $indexName) {
+		foreach ( $blueprint->getDroppedIndexes() as $indexName ) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nDROP INDEX %s;",
 				$table,
@@ -138,7 +138,7 @@ final class SqlCompiler {
 		}
 		
 		// ADD PRIMARY KEY (must be after drop)
-		if ($primary = $blueprint->getPrimary()) {
+		if ( $primary = $blueprint->getPrimary() ) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nADD %s;",
 				$table,
@@ -147,7 +147,7 @@ final class SqlCompiler {
 		}
 		
 		// ADD UNIQUE
-		foreach ($blueprint->getUniqueIndexes() as $index) {
+		foreach ( $blueprint->getUniqueIndexes() as $index ) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nADD %s;",
 				$table,
@@ -156,7 +156,7 @@ final class SqlCompiler {
 		}
 		
 		// ADD INDEX
-		foreach ($blueprint->getIndexes() as $index) {
+		foreach ( $blueprint->getIndexes() as $index ) {
 			$sql[] = sprintf(
 				"ALTER TABLE %s\nADD %s;",
 				$table,
@@ -215,6 +215,8 @@ final class SqlCompiler {
 			$sql[] = 'AUTO_INCREMENT';
 		}
 		
+		$sql = array_merge($sql, $this->compileColumnExtras($column));
+		
 		return implode(' ', $sql);
 	}
 	
@@ -223,7 +225,7 @@ final class SqlCompiler {
 		$type = $column->getType();
 		$args = $column->getArgs();
 		
-		switch ($type) {
+		switch ( $type ) {
 			
 			// numeric
 			case 'tinyInteger':
@@ -389,6 +391,8 @@ final class SqlCompiler {
 			$parts[] = 'AFTER ' . $column->getAfter();
 		}
 		
+		$parts = array_merge($parts, $this->compileColumnExtras($column));
+		
 		return implode(' ', $parts);
 	}
 	
@@ -428,9 +432,10 @@ final class SqlCompiler {
 			$sql[] = 'AFTER ' . $column->getAfter();
 		}
 		
+		$sql = array_merge($sql, $this->compileColumnExtras($column));
+		
 		return implode(' ', $sql);
 	}
-	
 	
 	
 	protected function compilePrimaryKey( Index $index ): string {
@@ -441,7 +446,7 @@ final class SqlCompiler {
 	}
 	
 	protected function compileUniqueKey( Index $index ): string {
-		if ($index->getName()) {
+		if ( $index->getName() ) {
 			return sprintf(
 				'CONSTRAINT %s UNIQUE (%s)',
 				$index->getName(),
@@ -456,7 +461,7 @@ final class SqlCompiler {
 	}
 	
 	protected function compileIndex( Index $index ): string {
-		if ($index->getName()) {
+		if ( $index->getName() ) {
 			return sprintf(
 				'INDEX %s (%s)',
 				$index->getName(),
@@ -468,6 +473,24 @@ final class SqlCompiler {
 			'INDEX (%s)',
 			implode(', ', $index->getColumns())
 		);
+	}
+	
+	protected function compileColumnExtras( Column $column ): array {
+		$sql = [];
+		
+		if ( $column->getCharset() ) {
+			$sql[] = 'CHARACTER SET ' . $column->getCharset();
+		}
+		
+		if ( $column->getCollation() ) {
+			$sql[] = 'COLLATE ' . $column->getCollation();
+		}
+		
+		if ( $column->getComment() ) {
+			$sql[] = "COMMENT '" . addslashes($column->getComment()) . "'";
+		}
+		
+		return $sql;
 	}
 	
 }

@@ -19,6 +19,11 @@ final class Column {
 	protected bool $autoIncrement = false;
 	protected bool $dropAutoIncrement = false;
 	
+	protected ?string $comment = null;
+	protected ?string $charset = null;
+	protected ?string $collation = null;
+	
+	
 	public function __construct( string $name, string $type, array $args = [] ) {
 		$this->name = $name;
 		$this->type = $type;
@@ -57,6 +62,32 @@ final class Column {
 	
 	public function change(): self {
 		$this->isChange = true;
+		return $this;
+	}
+	
+	public function autoIncrement(): self {
+		$this->autoIncrement = true;
+		return $this;
+	}
+	
+	public function removeAutoIncrement(): self {
+		$this->autoIncrement = false;
+		$this->dropAutoIncrement = true;
+		return $this;
+	}
+	
+	public function comment( string $comment ): self {
+		$this->comment = $comment;
+		return $this;
+	}
+	
+	public function charset( string $charset ): self {
+		$this->charset = $charset;
+		return $this;
+	}
+	
+	public function collation( string $collation ): self {
+		$this->collation = $collation;
 		return $this;
 	}
 	
@@ -102,19 +133,21 @@ final class Column {
 		return $this->autoIncrement;
 	}
 	
-	public function autoIncrement(): self {
-		$this->autoIncrement = true;
-		return $this;
+	public function getComment(): ?string {
+		return $this->comment;
 	}
 	
-	public function removeAutoIncrement(): self {
-		$this->autoIncrement = false;
-		$this->dropAutoIncrement = true;
-		return $this;
+	public function getCharset(): ?string {
+		return $this->charset;
+	}
+	
+	public function getCollation(): ?string {
+		return $this->collation;
 	}
 	
 	public function shouldDropAutoIncrement(): bool {
 		return $this->dropAutoIncrement;
 	}
+
 }
 
