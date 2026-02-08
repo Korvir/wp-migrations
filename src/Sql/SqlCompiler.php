@@ -292,6 +292,18 @@ final class SqlCompiler {
 			
 			case 'json':
 				return 'JSON';
+			
+			case 'macAddress':
+				return 'VARCHAR(17)';
+			
+			case 'ipAddress':
+				return 'VARCHAR(45)';
+			
+			case 'uuid':
+				return 'CHAR(36)';
+			
+			case 'ulid':
+				return 'CHAR(26)';
 				
 			// date / time
 			case 'date':
@@ -302,6 +314,9 @@ final class SqlCompiler {
 			
 			case 'dateTime':
 				return 'DATETIME';
+			
+			case 'year':
+				return 'YEAR';
 			
 			case 'timestamp':
 				return 'TIMESTAMP';

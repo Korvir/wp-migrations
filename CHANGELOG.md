@@ -8,8 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ---
 ## [1.0.1]
 - Column types:
-  - `enum`
   - `json`
+  - `year`
+
+- Specialty Types
+  - `macAddress`
+  - `ipAddress`
+  - `enum`
+  - `uuid`
+  - `ulid`
 
 ## [1.0.0] — 2026-02-07
 
