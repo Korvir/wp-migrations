@@ -278,6 +278,21 @@ final class SqlCompiler {
 			case 'binary':
 				return 'BLOB';
 			
+			case 'enum':
+				$values = $args[0] ?? [];
+				if (empty($values)) {
+					throw new RuntimeException('ENUM column requires at least one value.');
+				}
+				
+				$escaped = array_map(
+					static fn($v) => "'" . addslashes((string) $v) . "'",
+					$values
+				);
+				return 'ENUM(' . implode(', ', $escaped) . ')';
+			
+			case 'json':
+				return 'JSON';
+				
 			// date / time
 			case 'date':
 				return 'DATE';

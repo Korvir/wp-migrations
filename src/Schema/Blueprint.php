@@ -107,6 +107,14 @@ final class Blueprint {
 		return $this->addColumn('binary', $name);
 	}
 	
+	public function enum(string $name, array $values): Column {
+		return $this->addColumn('enum', $name, $values);
+	}
+	
+	public function json(string $name): Column {
+		return $this->addColumn('json', $name);
+	}
+	
 	public function date(string $name): Column {
 		return $this->addColumn('date', $name);
 	}
