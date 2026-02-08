@@ -21,6 +21,19 @@ class MigrationRunner {
 	
 	
 	/**
+	 * Executes the installation process by ensuring the necessary database table exists.
+	 *
+	 * This method invokes the repository to perform the required actions
+	 * to initialize or verify the existence of the database table needed
+	 * for the application to function properly.
+	 *
+	 * @return void This method does not return any value.
+	 */
+	public function install(): void {
+		$this->repository->ensureTable();
+	}
+	
+	/**
 	 * Retrieves a list of files that are pending processing. If a target name is provided,
 	 * only the file with the corresponding name is checked and included in the result.
 	 *
@@ -238,7 +251,6 @@ class MigrationRunner {
 	}
 	
 	
-	/* -------------------------------- */
 	
 	/**
 	 * Generates a list of migrations from the last executed batch available for rollback.
