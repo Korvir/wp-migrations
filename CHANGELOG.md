@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0
+- Column modifiers:
+    - `comment`
+    - `charset`
+    - `collation`
+
 ## 0.2.5
 - Documentation updates
 
