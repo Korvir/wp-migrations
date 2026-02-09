@@ -43,17 +43,45 @@ class MigrationRunner {
 	 * @return array An associative array of pending files, with the file names as keys
 	 *               and the file data as values.
 	 */
-	public function pending( ?string $target = null ): array {
+	public function pending( ?string $target = null, ?array $only = null, ?array $except = null ): array {
 		$this->repository->ensureTable();
 		
 		$pending = [];
 		foreach ( $this->getFiles() as $name => $file ) {
+			// positional <name> has the highest priority
 			if ( $target && $target !== $name ) {
 				continue;
 			}
+			
+			// already migrated
 			if ( $this->repository->has($name) ) {
 				continue;
 			}
+			
+			// --only filter
+			if ( $only ) {
+				$matched = false;
+				foreach ( $only as $token ) {
+					if ( strpos($name, $token) !== false ) {
+						$matched = true;
+						break;
+					}
+				}
+				if ( !$matched ) {
+					continue;
+				}
+			}
+			
+			
+			// --except filter
+			if ( $except ) {
+				foreach ( $except as $token ) {
+					if ( strpos($name, $token) ) {
+						continue 2;
+					}
+				}
+			}
+			
 			$pending[ $name ] = $file;
 		}
 		
@@ -75,13 +103,13 @@ class MigrationRunner {
 	 * @throws Exception If a migration does not implement MigrationInterface
 	 *                   or if an error occurs during the execution.
 	 */
-	public function migrate( ?string $target = null ): int {
+	public function migrate( ?string $target = null, ?array $only = null, ?array $except = null ): int {
 		global $wpdb;
 		
 		$wpdb->hide_errors();
 		$this->repository->ensureTable();
 		
-		$pending = $this->pending($target);
+		$pending = $this->pending($target, $only, $except);
 		if ( empty($pending) ) {
 			return 0;
 		}
@@ -249,7 +277,6 @@ class MigrationRunner {
 		
 		return $list;
 	}
-	
 	
 	
 	/**
