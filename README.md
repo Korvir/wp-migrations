@@ -38,6 +38,13 @@ reset -  Rollback all database migrations.
 fresh -  Drop all tables and re-run all migrations.
 ```
 
+`migrate` command can be used with optional flags `--only` and `--except` to run specific migrations:
+```bash
+wp migrations migrate --only=2021_01_01_000000_create_users_table
+wp migrations migrate --except=2021_01_01_000000_create_users_table
+wp migrations migrate --only=2021_01_01_000000_create_users_table,2021_01_01_000001_create_posts_table
+```
+
 
 ### Pretend mode (dry-run)
 All migration commands support the `--pretend` flag.
