@@ -51,6 +51,42 @@ final class Schema {
 		$wpdb->query("DROP TABLE IF EXISTS {$table}");
 	}
 	
+	public static function hasTable( string $table ): bool {
+		global $wpdb;
+		$prefixed = $wpdb->prefix . $table;
+		
+		$sql = $wpdb->prepare(
+			"SHOW TABLES LIKE %s",
+			$prefixed
+		);
+		
+		return (bool)$wpdb->get_var($sql);
+	}
+	
+	public static function hasColumn( string $table, string $column ): bool {
+		global $wpdb;
+		$prefixed = $wpdb->prefix . $table;
+		
+		$sql = $wpdb->prepare(
+			"SHOW COLUMNS FROM {$prefixed} LIKE %s",
+			$column
+		);
+		
+		return (bool)$wpdb->get_var($sql);
+	}
+	
+	public static function hasIndex( string $table, string $index ): bool {
+		global $wpdb;
+		$prefixed = $wpdb->prefix . $table;
+		
+		$sql = $wpdb->prepare(
+			"SHOW INDEX FROM {$prefixed} WHERE Key_name = %s",
+			$index
+		);
+		
+		return (bool)$wpdb->get_var($sql);
+	}
+	
 	
 	protected static function execute( array $queries ): void {
 		if ( !self::$db ) {
