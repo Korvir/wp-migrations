@@ -5,6 +5,7 @@ namespace WPMigrations\Sql;
 use RuntimeException;
 use WPMigrations\Schema\Blueprint;
 use WPMigrations\Schema\Column;
+use WPMigrations\Schema\ForeignKey;
 use WPMigrations\Schema\Index;
 use WPMigrations\Schema\TableContext;
 
@@ -25,11 +26,19 @@ final class SqlCompiler {
 		// Restricted operations with "CREATE"
 		if (
 			$blueprint->getDroppedColumns() ||
-			$blueprint->getRenamedColumns() ||
-			$blueprint->getChangedColumns()
+			$blueprint->getRenamedColumns()
 		) {
 			throw new RuntimeException('Error! CREATE TABLE does not support drop/rename/change operations.');
 		}
+		foreach ($blueprint->getColumns() as $column) {
+			if ($column->isChange()) {
+				throw new RuntimeException(
+					'Error! CREATE TABLE does not support change operations.'
+				);
+			}
+		}
+		// ---
+		
 		
 		// 1) Table options (charset / collation)
 		$table = $context->getPrefixedName();
@@ -46,7 +55,7 @@ final class SqlCompiler {
 		}
 		
 		// 3) Indexes
-		$indexDefinitions = $this->compileCreateIndexes($blueprint);
+		$indexDefinitions = $this->compileCreateIndexes($blueprint, $context);
 		$allDefinitions = array_merge($definitions, $indexDefinitions);
 		
 		
@@ -137,6 +146,16 @@ final class SqlCompiler {
 			);
 		}
 		
+		// DROP FOREIGN KEY
+		foreach ( $blueprint->getDroppedForeignKeys() as $name ) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nDROP FOREIGN KEY %s;",
+				$table,
+				$name
+			);
+		}
+		
+		
 		// ADD PRIMARY KEY (must be after drop)
 		if ( $primary = $blueprint->getPrimary() ) {
 			$sql[] = sprintf(
@@ -181,6 +200,15 @@ final class SqlCompiler {
 				"ALTER TABLE %s\n%s;",
 				$table,
 				implode("\n", $clauses)
+			);
+		}
+		
+		// ADD FOREIGN KEYS
+		foreach ( $blueprint->getForeignKeys() as $fk ) {
+			$sql[] = sprintf(
+				"ALTER TABLE %s\nADD %s;",
+				$table,
+				$this->compileForeignKey($fk, $context)
 			);
 		}
 		
@@ -280,12 +308,12 @@ final class SqlCompiler {
 			
 			case 'enum':
 				$values = $args[0] ?? [];
-				if (empty($values)) {
+				if ( empty($values) ) {
 					throw new RuntimeException('ENUM column requires at least one value.');
 				}
 				
 				$escaped = array_map(
-					static fn($v) => "'" . addslashes((string) $v) . "'",
+					static fn ( $v ) => "'" . addslashes((string)$v) . "'",
 					$values
 				);
 				return 'ENUM(' . implode(', ', $escaped) . ')';
@@ -304,7 +332,7 @@ final class SqlCompiler {
 			
 			case 'ulid':
 				return 'CHAR(26)';
-				
+			
 			// date / time
 			case 'date':
 				return 'DATE';
@@ -364,7 +392,7 @@ final class SqlCompiler {
 	}
 	
 	
-	protected function compileCreateIndexes( Blueprint $blueprint ): array {
+	protected function compileCreateIndexes( Blueprint $blueprint, TableContext $context ): array {
 		$sql = [];
 		
 		// PRIMARY KEY
@@ -380,6 +408,11 @@ final class SqlCompiler {
 		// INDEX
 		foreach ( $blueprint->getIndexes() as $index ) {
 			$sql[] = $this->compileIndex($index);
+		}
+		
+		// FOREIGN KEYS
+		foreach ( $blueprint->getForeignKeys() as $fk ) {
+			$sql[] = $this->compileForeignKey($fk, $context);
 		}
 		
 		return $sql;
@@ -522,5 +555,33 @@ final class SqlCompiler {
 		
 		return $sql;
 	}
+	
+	protected function compileForeignKey( ForeignKey $fk, TableContext $context ): string {
+		global $wpdb;
+		
+		$name = $fk->getName()
+			?? $context->getName() . '_' . $fk->getColumn() . '_foreign';
+		
+		$referencedTable = $wpdb->prefix . $fk->getOn();
+		
+		$sql = sprintf(
+			'CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s)',
+			$name,
+			$fk->getColumn(),
+			$referencedTable,
+			$fk->getReferences()
+		);
+		
+		if ( $fk->getOnDelete() ) {
+			$sql .= ' ON DELETE ' . strtoupper($fk->getOnDelete());
+		}
+		
+		if ( $fk->getOnUpdate() ) {
+			$sql .= ' ON UPDATE ' . strtoupper($fk->getOnUpdate());
+		}
+		
+		return $sql;
+	}
+	
 	
 }

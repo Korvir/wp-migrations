@@ -22,6 +22,9 @@ final class Blueprint {
 	protected bool $dropPrimary = false;
 	protected array $droppedIndexes = [];
 	
+	protected array $foreignKeys = [];
+	protected array $droppedForeignKeys = [];
+	
 	
 	public function __construct( string $table, string $mode ) {
 		$this->context = new TableContext($table, $mode);
@@ -178,6 +181,19 @@ final class Blueprint {
 		$this->indexes[] = new Index('index', (array)$columns, $name);
 	}
 	
+	// ---------- Foreign Keys ----------
+	public function foreign(string $column): ForeignKey {
+		$fk = new ForeignKey($column);
+		$this->foreignKeys[] = $fk;
+		return $fk;
+	}
+	
+	public function dropForeign(string $name): void {
+		$this->droppedForeignKeys[] = $name;
+	}
+	
+	
+	
 	
 	// ---------- destructive ----------
 	
@@ -242,6 +258,14 @@ final class Blueprint {
 	
 	public function getDroppedIndexes(): array {
 		return $this->droppedIndexes;
+	}
+	
+	public function getForeignKeys(): array {
+		return $this->foreignKeys;
+	}
+	
+	public function getDroppedForeignKeys(): array {
+		return $this->droppedForeignKeys;
 	}
 	
 }

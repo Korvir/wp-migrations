@@ -82,6 +82,100 @@ To drop an index, you must know its name.
 
 ---
 
+## Foreign Key Constraints
+
+Foreign key constraints are supported explicitly and without magic.
+
+This package does **not** attempt to:
+- detect existing constraints
+- infer relationships
+- automatically manage rollback safety
+
+Foreign keys are executed exactly as declared.
+
+---
+
+### Creating a Foreign Key
+```php
+Schema::table('orders', function (Blueprint $table) {
+	$table->foreign('user_id')
+		->references('id')
+		->on('users')
+		->onDelete('cascade');
+});
+```
+This generates:
+```sql
+ALTER TABLE wp_orders
+ADD CONSTRAINT orders_user_id_foreign
+FOREIGN KEY (user_id)
+REFERENCES wp_users(id)
+ON DELETE CASCADE;
+```
+If no constraint name is provided, the following naming convention is used:
+
+`{table}_{column}_foreign` === `(orders_user_id_foreign)`
+
+### Dropping a Foreign Key
+Foreign keys must be dropped by name.
+```php
+Schema::table('orders', function (Blueprint $table) {
+    $table->dropForeign('orders_user_id_foreign');
+});
+```
+
+This generates:
+```sql
+ALTER TABLE wp_orders DROP FOREIGN KEY orders_user_id_foreign;
+```
+
+###Foreign Keys and Column Changes
+MySQL does not allow modifying or dropping a column while a foreign key exists.
+
+You must drop the foreign key first.
+
+Examples:
+```php
+// Changing a column type
+public function up() {
+    Schema::table('orders', function (Blueprint $table) {
+        $table->dropForeign('orders_user_id_foreign');
+        $table->bigInteger('user_id')->change();
+        $table->foreign('user_id')
+            ->references('id')
+            ->on('users');
+    });
+}
+public function down() {
+    Schema::table('orders', function (Blueprint $table) {
+        $table->dropForeign('orders_user_id_foreign');
+        $table->integer('user_id')->change();
+        $table->foreign('user_id')
+            ->references('id')
+            ->on('users');
+    });
+}
+
+
+// Dropping Columns with Foreign Keys
+public function up() {
+    Schema::table('orders', function (Blueprint $table) {
+        $table->dropForeign('orders_user_id_foreign');
+        $table->dropColumn('user_id');
+    });
+}
+public function down() {
+    Schema::table('orders', function (Blueprint $table) {
+        $table->bigInteger('user_id');
+        $table->foreign('user_id')
+            ->references('id')
+            ->on('users');
+    });
+}
+```
+
+---
+
 ### Migration stubs
 Migration stubs are selected automatically based on migration name prefix:
 - create_* → create stub
