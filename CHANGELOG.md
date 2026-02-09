@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
+### [1.1.0]
+- Schema methods:
+  - `raw`,
+  - `hasTable`,
+  - `hasColumn`,
+  - `hasIndex`
+
+- Migrate command
+  - options `--only`, `--except`
+
+- Views support
+  - `createView`
+  - `dropView`,
+  - `createOrReplaceView`
+
 ## [1.0.3]
 - ForeignKey support
 

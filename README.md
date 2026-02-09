@@ -30,19 +30,29 @@ wp migrations reset
 wp migrations fresh
 ```
 
-#### Commands overview
-```bash
-add -  Create a new migration file.
-migrate -  Run pending migrations.
-rollback -  Rollback the last database migration in batch.
-rollback --step N - Rollback the N last database migration,
-status -  Show a list of all migrations.
-reset -  Rollback all database migrations.
-fresh -  Drop all tables and re-run all migrations.
-```
+#### Available Commands
+| Command | Description |
+|-------|:------------|
+| `wp migrations add <name>` | Create a new migration file. |
+| `wp migrations migrate` | Run all pending migrations. |
+| `wp migrations rollback` | Roll back the last batch of database migrations. |
+| `wp migrations rollback --step=N` | Roll back the last `N` migrations. |
+| `wp migrations status` | Display the status of all migrations. |
+| `wp migrations reset` | Roll back all database migrations. |
+| `wp migrations fresh` | Drop all tables and re-run all migrations. |
 
-`migrate` command can be used with optional flags `--only` and `--except` to run specific migrations:
+
+### Commands Options
+| Option | Description |
+|------|-------------|
+| `--pretend` | Show which migrations would be executed without running them. |
+| `--only=<names>` | Run only migrations whose filenames contain the given comma-separated name fragments. |
+| `--except=<names>` | Run all migrations except those whose filenames contain the given comma-separated name fragments. |
+| `--step=<N>` | Limit the number of migrations to roll back. Used with `rollback`. |
+> Filtering options (`--only`, `--except`) apply only to the current command execution  
+> and do not affect migration state or batches.
 ```bash
+// Example:
 wp migrations migrate --only=2021_01_01_000000_create_users_table
 wp migrations migrate --except=2021_01_01_000000_create_users_table
 wp migrations migrate --only=2021_01_01_000000_create_users_table,2021_01_01_000001_create_posts_table
