@@ -177,6 +177,30 @@ public function down() {
 }
 ```
 
+## Multisite
+Not supported.
+
+But you may apply schema changes across multiple sites manually
+(e.g. by iterating over `get_sites()` and using `switch_to_blog()`).
+
+In this case, the migration is still considered a single unit.
+Rollback correctness is the responsibility of the migration author.
+
+Example:
+```php
+public function up() {
+    foreach (get_sites() as $site) {
+        switch_to_blog($site->blog_id);
+    
+        Schema::table('orders', function (Blueprint $table) {
+            $table->string('foo');
+        });
+    
+        restore_current_blog();
+    }
+}
+```
+
 ---
 
 ### Migration stubs
