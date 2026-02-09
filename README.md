@@ -27,13 +27,16 @@ wp migrations status
 wp migrations reset
 wp migrations fresh
 ```
-#### `add` Create a new migration file.
-#### `migrate` Run pending migrations.
-#### `rollback` Rollback the last database migration in batch.
-#### `rollback --step N` Rollback the N last database migration,
-#### `status` Show a list of all migrations.
-#### `reset` Rollback all database migrations.
-#### `fresh` Drop all tables and re-run all migrations.
+#### Commands overview
+```bash
+add -  Create a new migration file.
+migrate -  Run pending migrations.
+rollback -  Rollback the last database migration in batch.
+rollback --step N - Rollback the N last database migration,
+status -  Show a list of all migrations.
+reset -  Rollback all database migrations.
+fresh -  Drop all tables and re-run all migrations.
+```
 
 
 ### Pretend mode (dry-run)
@@ -129,7 +132,7 @@ This generates:
 ALTER TABLE wp_orders DROP FOREIGN KEY orders_user_id_foreign;
 ```
 
-###Foreign Keys and Column Changes
+### Foreign Keys and Column Changes
 MySQL does not allow modifying or dropping a column while a foreign key exists.
 
 You must drop the foreign key first.
