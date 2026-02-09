@@ -2,6 +2,7 @@
 
 namespace WPMigrations\Schema;
 
+use InvalidArgumentException;
 use wpdb;
 use WPMigrations\Sql\SqlCompiler;
 
@@ -28,6 +29,21 @@ final class Schema {
 		$sql = ( new SqlCompiler() )->compile($blueprint);
 		self::execute($sql);
 	}
+	
+	public static function raw( $queries ): void {
+		if ( is_string($queries) ) {
+			$queries = [ $queries ];
+		}
+		
+		if ( !is_array($queries) ) {
+			throw new InvalidArgumentException(
+				'Schema::raw() expects string or array of strings.'
+			);
+		}
+		
+		self::execute($queries);
+	}
+	
 	
 	public static function rename( string $from, string $to ): void {
 		global $wpdb;
@@ -85,6 +101,33 @@ final class Schema {
 		);
 		
 		return (bool)$wpdb->get_var($sql);
+	}
+	
+	public static function createView( string $name, string $select ): void {
+		global $wpdb;
+		$view = $wpdb->prefix . $name;
+		
+		self::execute([
+			"CREATE VIEW {$view} AS {$select}",
+		]);
+	}
+	
+	public static function dropView( string $name ): void {
+		global $wpdb;
+		$view = $wpdb->prefix . $name;
+		
+		self::execute([
+			"DROP VIEW {$view}",
+		]);
+	}
+	
+	public static function createOrReplaceView( string $name, string $select ): void {
+		global $wpdb;
+		$view = $wpdb->prefix . $name;
+		
+		self::execute([
+			"CREATE OR REPLACE VIEW {$view} AS {$select}",
+		]);
 	}
 	
 	
