@@ -5,6 +5,7 @@ namespace WPMigrations\Sql;
 use RuntimeException;
 use WPMigrations\Schema\Blueprint;
 use WPMigrations\Schema\Column;
+use WPMigrations\Schema\Expression;
 use WPMigrations\Schema\ForeignKey;
 use WPMigrations\Schema\Index;
 use WPMigrations\Schema\TableContext;
@@ -356,17 +357,24 @@ final class SqlCompiler {
 	
 	
 	protected function compileDefault( $value ): string {
-		if ( is_string($value) ) {
+		// RAW expression
+		if ($value instanceof Expression) {
+			return (string) $value;
+		}
+		
+		if (is_string($value)) {
 			return "'" . addslashes($value) . "'";
 		}
 		
-		if ( is_bool($value) ) {
+		if (is_bool($value)) {
 			return $value ? '1' : '0';
 		}
 		
-		if ( $value === null ) {
+		if ($value === null) {
 			return 'NULL';
 		}
+		
+		return (string) $value;
 		
 		return (string)$value;
 	}
