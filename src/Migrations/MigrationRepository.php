@@ -2,8 +2,6 @@
 
 namespace WPMigrations\Migrations;
 
-use function WPMigrations\current_time;
-use const WPMigrations\ARRAY_A;
 
 /**
  * Handles database operations related to migration tracking.
