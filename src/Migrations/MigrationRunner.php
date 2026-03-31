@@ -17,8 +17,7 @@ class MigrationRunner {
 		$table = $config['table'] ?? $connection->tablePrefix() . 'migrations';
 		$strict = array_key_exists('strict', $config) ? (bool)$config['strict'] : true;
 
-		$wpdb = $this->unwrapWpdb($connection);
-		$this->repository = new MigrationRepository($wpdb, $table);
+		$this->repository = new MigrationRepository($connection, $table);
 		$this->finder = new MigrationFinder($this->path, $this->repository);
 		$this->migrator = new Migrator($this->repository, $this->finder, $connection, $strict);
 	}
@@ -90,14 +89,5 @@ class MigrationRunner {
 
 		global $wpdb;
 		return new WPDBConnection($wpdb);
-	}
-
-	private function unwrapWpdb( ConnectionInterface $connection ) {
-		if ( $connection instanceof WPDBConnection ) {
-			return $connection->wpdb();
-		}
-
-		global $wpdb;
-		return $wpdb;
 	}
 }

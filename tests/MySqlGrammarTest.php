@@ -12,9 +12,9 @@ class MySqlGrammarTest extends TestCase {
 		$this->assertSame('`users`', $grammar->wrapIdentifier('users'));
 	}
 
-	public function test_wrap_identifier_rejects_unsafe_identifier(): void {
+	public function test_wrap_identifier_rejects_backtick_in_identifier(): void {
 		$grammar = new MySqlGrammar();
 		$this->expectException(InvalidArgumentException::class);
-		$grammar->wrapIdentifier('users;DROP TABLE users');
+		$grammar->wrapIdentifier('bad`name');
 	}
 }

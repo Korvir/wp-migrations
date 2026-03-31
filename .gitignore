@@ -59,6 +59,7 @@ node_modules/
 docker_dir
 package-lock.json
 composer.lock
+!composer.lock
 
 
 

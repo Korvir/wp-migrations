@@ -10,8 +10,16 @@ final class MySqlGrammar implements GrammarInterface {
 	}
 
 	public function wrapIdentifier( string $name ): string {
-		if ( !preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $name) ) {
-			throw new InvalidArgumentException("Unsafe SQL identifier [{$name}].");
+		if ( $name === '' ) {
+			throw new InvalidArgumentException('SQL identifier cannot be empty.');
+		}
+
+		if ( strpos($name, '`') !== false ) {
+			throw new InvalidArgumentException("Unsafe SQL identifier [{$name}] contains backtick.");
+		}
+
+		if ( preg_match('/[\x00-\x1F\x7F]/', $name) ) {
+			throw new InvalidArgumentException("Unsafe SQL identifier [{$name}] contains control characters.");
 		}
 
 		return '`' . $name . '`';
