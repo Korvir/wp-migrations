@@ -6,45 +6,48 @@ final class TableContext {
 	protected string $name;
 	protected string $prefixedName;
 	protected string $mode;
-	
+
 	protected ?string $charset = null;
 	protected ?string $collation = null;
-	
+
 	public function __construct( string $name, string $mode ) {
 		$this->name = $name;
 		$this->mode = $mode;
-		
+
+		$prefix = '';
 		global $wpdb;
-		$this->prefixedName = $wpdb->prefix . $name;
+		if ( isset($wpdb) && isset($wpdb->prefix) ) {
+			$prefix = (string)$wpdb->prefix;
+		}
+
+		$this->prefixedName = $prefix . $name;
 	}
-	
+
 	public function setCharset( string $charset ): void {
 		$this->charset = $charset;
 	}
-	
+
 	public function setCollation( string $collation ): void {
 		$this->collation = $collation;
 	}
-	
+
 	public function getName(): string {
 		return $this->name;
 	}
-	
+
 	public function getPrefixedName(): string {
 		return $this->prefixedName;
 	}
-	
+
 	public function getMode(): string {
 		return $this->mode;
 	}
-	
+
 	public function getCharset(): ?string {
 		return $this->charset;
 	}
-	
+
 	public function getCollation(): ?string {
 		return $this->collation;
 	}
-	
 }
-

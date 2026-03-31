@@ -1,9 +1,10 @@
 <?php
 
+use WPMigrations\Migrations\MigrationInterface;
 use WPMigrations\Schema\Blueprint;
 use WPMigrations\Schema\Schema;
 
-return new class
+return new class implements MigrationInterface
 {
 	
 	public function up() {
