@@ -1,94 +1,118 @@
 # Simple WP Migrations
+
 Simple, explicit database migrations for WordPress via WP-CLI.
 
-This package provides a minimal execution-based migration system inspired by Laravel,
-but designed specifically for WordPress and MySQL/MariaDB.
+`korvir/wp-migrations` is a lightweight migration system inspired by Laravel,
+but focused on WordPress + MySQL/MariaDB.
 
-
-#### Install
-```bash
-composer require korvir/wp-migrations
-```
-
-#### Requirements
+## Requirements
 - PHP 7.4+
 - WordPress 5.5+
 - MySQL/MariaDB
 - WP-CLI
 
----
+## Install
 
-## Migrations
-
-### Commands
 ```bash
-wp migrations add
+composer require korvir/wp-migrations
+```
+
+## Quick Start
+
+Create a migration:
+```bash
+wp migrations add create_users_table
+```
+
+Run pending migrations:
+```bash
 wp migrations migrate
-wp migrations rollback
+```
+
+Check status:
+```bash
 wp migrations status
-wp migrations reset
-wp migrations fresh
 ```
 
-#### Available Commands
+Rollback last batch:
+```bash
+wp migrations rollback
+```
+
+## Commands
+
 | Command | Description |
-|-------|:------------|
-| `wp migrations add <name>` | Create a new migration file. |
-| `wp migrations migrate` | Run all pending migrations. |
-| `wp migrations rollback` | Roll back the last batch of database migrations. |
-| `wp migrations rollback --step=N` | Roll back the last `N` migrations. |
-| `wp migrations status` | Display the status of all migrations. |
-| `wp migrations reset` | Roll back all database migrations. |
-| `wp migrations fresh` | Drop all tables and re-run all migrations. |
+|---|---|
+| `wp migrations install` | Create migrations table. |
+| `wp migrations add <name>` | Create migration file from stub. |
+| `wp migrations migrate [<name>]` | Run pending migrations. |
+| `wp migrations rollback` | Roll back last batch. |
+| `wp migrations status` | Show migration status table. |
+| `wp migrations reset` | Roll back all executed migrations. |
+| `wp migrations fresh` | Reset and run all pending migrations. |
+| `wp migrations stub:publish` | Publish package stubs to project. |
+
+### Command Options
+
+`add`
+- `--path=<path>`: custom migrations path.
+
+`migrate`
+- `[<name>]`: run one specific migration.
+- `--only=<names>`: comma-separated filename fragments to include.
+- `--except=<names>`: comma-separated filename fragments to exclude.
+- `--step=<N>`: run only next N pending migrations.
+- `--path=<path>`: custom migrations path.
+- `--pretend`: dry-run (print migrations without executing).
+- `--force`: skip production confirmation.
+
+`rollback`
+- `--step=<N>`: rollback N latest executed migrations (ignores batch boundary).
+- `--pretend`: dry-run.
+
+`reset`
+- `--path=<path>`
+- `--pretend`
+
+`fresh`
+- `--path=<path>`
+- `--pretend`
+
+Notes:
+- `--only` and `--except` are mutually exclusive.
+- In `production` environment, `migrate` asks for confirmation unless `--force` is provided.
 
 
-### Commands Options
-| Option | Description |
-|------|-------------|
-| `--pretend` | Show which migrations would be executed without running them. |
-| `--only=<names>` | Run only migrations whose filenames contain the given comma-separated name fragments. |
-| `--except=<names>` | Run all migrations except those whose filenames contain the given comma-separated name fragments. |
-| `--step=<N>` | Limit the number of migrations to roll back. Used with `rollback`. |
-> Filtering options (`--only`, `--except`) apply only to the current command execution  
-> and do not affect migration state or batches.
-```bash
-// Example:
-wp migrations migrate --only=2021_01_01_000000_create_users_table
-wp migrations migrate --except=2021_01_01_000000_create_users_table
-wp migrations migrate --only=2021_01_01_000000_create_users_table,2021_01_01_000001_create_posts_table
-```
+## Migration File Structure
 
-
-#### Migration Pretend mode (dry-run)
-All migration commands support the `--pretend` flag.
-When enabled, migrations are **not executed**.
-Instead, the command will show what *would* be done.
-
-Preview pending migrations:
-```bash
-wp migrations migrate --pretend
-wp migrations rollback --step=2 --pretend
-```
-
-
-### Migration Structure
+Use `MigrationInterface`:
 ```php
-return new class {
-    public function up(){
-        // apply changes
+<?php
+
+use WPMigrations\Migrations\MigrationInterface;
+use WPMigrations\Schema\Blueprint;
+use WPMigrations\Schema\Schema;
+
+return new class implements MigrationInterface
+{
+    public function up(): void {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('email', 190);
+            $table->timestamps();
+        });
     }
-    public function down(){
-        // rollback changes
+
+    public function down(): void {
+        Schema::dropIfExists('users');
     }
 };
 ```
 
----
+## Schema API
 
-## Schema Builder & Blueprint
-Schema and Blueprint provide a declarative API for describing structural tables in WordPress (MySQL/MariaDB) migrations.
+### Schema methods
 
-### Methods:
 ```php
 Schema::create();
 Schema::table();
@@ -100,260 +124,150 @@ Schema::hasColumn();
 Schema::hasIndex();
 Schema::createView();
 Schema::dropView();
+Schema::createOrReplaceView();
+Schema::raw();
 ```
 
-#### Charset & Collation
-In `Schema::table()`, `charset()` and `collation()` change
-the table default charset and collation only.
+### Column Types (Blueprint)
 
-Existing columns and data are not modified.
-```php
-Schema::create('posts', function (Blueprint $table) {
-    $table->charset('utf8mb4');
-    $table->collation('utf8mb4_unicode_ci');
-});
+| Blueprint method | SQL / behavior |
+|---|---|
+| `id()` | `BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY` |
+| `increments()` | `INT UNSIGNED AUTO_INCREMENT PRIMARY KEY` |
+| `bigIncrements()` | `BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY` |
+| `tinyInteger()` | `TINYINT` |
+| `smallInteger()` | `SMALLINT` |
+| `mediumInteger()` | `MEDIUMINT` |
+| `integer()` | `INT` |
+| `bigInteger()` | `BIGINT` |
+| `decimal($precision, $scale)` | `DECIMAL(p, s)` |
+| `float()` | `FLOAT` |
+| `double()` | `DOUBLE` |
+| `boolean()` | `TINYINT(1)` |
+| `char($length)` | `CHAR(length)` |
+| `string($length = 255)` | `VARCHAR(length)` |
+| `text()` | `TEXT` |
+| `mediumText()` | `MEDIUMTEXT` |
+| `longText()` | `LONGTEXT` |
+| `binary()` | `BLOB` |
+| `enum(array $values)` | `ENUM(...)` |
+| `json()` | `JSON` |
+| `uuid()` | `CHAR(36)` |
+| `ulid()` | `CHAR(26)` |
+| `ipAddress()` | `VARCHAR(45)` |
+| `macAddress()` | `VARCHAR(17)` |
+| `date()` | `DATE` |
+| `time()` | `TIME` |
+| `dateTime()` | `DATETIME` |
+| `timestamp()` | `TIMESTAMP` |
+| `year()` | `YEAR` |
+| `timestamps()` | Adds `created_at` + `updated_at` |
+| `timestampsTz()` | Alias of `timestamps()` |
+| `softDeletes()` | Adds nullable `deleted_at` |
+| `foreignId($column)` | Adds unsigned `BIGINT` foreign key column helper |
 
-// If not specified, WordPress defaults ($wpdb->get_charset_collate()) are used.
-```
+### Column Modifiers
 
-### Table Columns
-#### Supported column types
-| Blueprint method              | SQL type                                     |
-| ----------------------------- | -------------------------------------------- |
-| `id()`                        | `BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY` |
-| `increments()`                | `INT UNSIGNED AUTO_INCREMENT`                |
-| `bigIncrements()`             | `BIGINT UNSIGNED AUTO_INCREMENT`             |
-| `integer()`                   | `INT`                                        |
-| `bigInteger()`                | `BIGINT`                                     |
-| `mediumInteger()`             | `MEDIUMINT`                                  |
-| `smallInteger()`              | `SMALLINT`                                   |
-| `tinyInteger()`               | `TINYINT`                                    |
-| `boolean()`                   | `TINYINT(1)`                                 |
-| `string($length = 255)`       | `VARCHAR($length)`                           |
-| `char($length)`               | `CHAR($length)`                              |
-| `text()`                      | `TEXT`                                       |
-| `mediumText()`                | `MEDIUMTEXT`                                 |
-| `longText()`                  | `LONGTEXT`                                   |
-| `binary()`                    | `BLOB`                                       |
-| `float()`                     | `FLOAT`                                      |
-| `double()`                    | `DOUBLE`                                     |
-| `decimal($precision, $scale)` | `DECIMAL(p, s)`                              |
-| `date()`                      | `DATE`                                       |
-| `dateTime()`                  | `DATETIME`                                   |
-| `time()`                      | `TIME`                                       |
-| `timestamp()`                 | `TIMESTAMP`                                  |
-| `timestamps()`                | `created_at` + `updated_at` (`DATETIME`)     |
-| `year()`                      | `YEAR`                                       |
-| `json()`                      | `JSON`                                       |
-| `enum(array $values)`         | `ENUM(...)`                                  |
-| `uuid()`                      | `CHAR(36)`                                   |
-| `ulid()`                      | `CHAR(26)`                                   |
-| `ipAddress()`                 | `VARCHAR(45)`                                |
-| `macAddress()`                | `VARCHAR(17)`                                |
+| Modifier | Description |
+|---|---|
+| `nullable()` | Set column to `NULL` |
+| `notNullable()` | Set column to `NOT NULL` |
+| `default($value)` | Set default value |
+| `unsigned()` | Add `UNSIGNED` (numeric types) |
+| `autoIncrement()` | Add `AUTO_INCREMENT` |
+| `removeAutoIncrement()` | Remove auto increment flag |
+| `comment($text)` | Add column comment |
+| `charset($charset)` | Set column charset |
+| `collation($collation)` | Set column collation |
+| `first()` | Place column first |
+| `after($column)` | Place column after another column |
+| `change()` | Compile as column modification (`ALTER ... MODIFY`) |
 
+### Indexes
 
-#### Supported column Modifiers
-Modifiers can be chained on column definitions.
+| Method | Description |
+|---|---|
+| `primary($columns)` | Add primary key |
+| `unique($columns, $name = null)` | Add unique index |
+| `index($columns, $name = null)` | Add non-unique index |
+| `dropPrimary()` | Drop primary key |
+| `dropUnique($name)` | Drop unique index by name |
+| `dropIndex($name)` | Drop index by name |
 
-| Modifier                | Description                |
-| ----------------------- | -------------------------- |
-| `nullable()`            | Allows `NULL`              |
-| `notNullable()`         | Sets `NOT NULL`            |
-| `default($value)`       | Default value              |
-| `unsigned()`            | UNSIGNED (numeric types)   |
-| `autoIncrement()`       | AUTO_INCREMENT             |
-| `comment($text)`        | Column comment             |
-| `charset($charset)`     | Column charset             |
-| `collation($collation)` | Column collation           |
-| `first()`               | Place column first         |
-| `after($column)`        | Place column after another |
-```php
-// Example:
-$table->string('status', 20)
-	->unsigned()
-	->default(1)
-	->comment('User status');
-```
+### Foreign Keys
 
-#### Changing column types
-```php
-// To modify an existing column, define it again and call change().
-$table->string('email', 320)->change();
-```
+- `foreign($column)->references()->on()->onDelete()->onUpdate()->name()`
+- `dropForeign($name)`
+- `foreignId($column)->constrained($table = null, $column = 'id')`
+- `foreignId(...)->cascadeOnDelete()/cascadeOnUpdate()/restrictOnDelete()/nullOnDelete()`
+- `dropConstrainedForeignId($column)`
 
-#### Dropping & Renaming Columns
-```php
-$table->dropColumn('legacy');
-$table->dropColumn(['foo', 'bar']);
-
-$table->renameColumn('old_name', 'new_name');
-```
-
-#### Adding & Dropping Indexes
-Primary keys are unnamed.
-
-Unique and non-unique indexes may be named explicitly.
-If an index name is not provided, MySQL will generate one automatically.
-
-To drop an index, you must know its name.
-```php
-// Creating indexes
-$table->primary('id');
-$table->unique('email');
-$table->index(['user_id', 'status']);
-
-// Named indexes
-$table->unique('email', 'unique_email');
-$table->index(['user_id'], 'idx_user');
-
-// Dropping indexes
-$table->dropPrimary();
-$table->dropIndex('idx_user');
-$table->dropUnique('unique_email');
-```
-
-#### Adding & Dropping Foreign Keys
-This package does **not** attempt to:
-- detect existing constraints
-- infer relationships
-- automatically manage rollback safety
-
-Foreign keys are executed exactly as declared. If no constraint name is provided, the following naming convention is used:
-`{table}_{column}_foreign` === `(orders_user_id_foreign)`
+## Views
 
 ```php
-// Examples:
-Schema::table('orders', function (Blueprint $table) {
-    $table->foreign('user_id')
-        ->references('id')
-        ->on('users')
-        ->onDelete('cascade');
-});
-
-Schema::table('orders', function (Blueprint $table) {
-    $table->dropForeign('orders_user_id_foreign');
-});
-```
-This generates:
-```sql
-ALTER TABLE wp_orders
-ADD CONSTRAINT orders_user_id_foreign
-FOREIGN KEY (user_id)
-REFERENCES wp_users(id)
-ON DELETE CASCADE;
-
-ALTER TABLE wp_orders DROP FOREIGN KEY orders_user_id_foreign;
-```
-
-#### Foreign Keys and Column Changes
-MySQL does not allow modifying or dropping a column while a foreign key constraint exists.
-
-When changing or dropping such columns, foreign keys must be dropped manually
-and re-created if necessary.
-
-Examples:
-```php
-// Changing a column type
-public function up() {
-    Schema::table('orders', function (Blueprint $table) {
-        $table->dropForeign('fk_orders_user');
-        $table->bigInteger('user_id')->change();
-        $table->foreign('user_id')
-            ->references('id')
-            ->on('users');
-    });
-}
-
-// Dropping a column that participates in a foreign key constraint
-// requires dropping the foreign key first.
-public function up() {
-    Schema::table('orders', function (Blueprint $table) {
-        $table->dropForeign('fk_orders_user');
-        $table->dropColumn('user_id');
-    });
-}
-```
-
----
-
-#### Database Views
-Views may be created using raw SQL.
-```php
-Schema::createView('active_users', '
-    SELECT id, email
-    FROM users
-    WHERE active = 1
-');
+Schema::createOrReplaceView(
+    'active_users',
+    "SELECT id, email FROM wp_users WHERE user_status = 0"
+);
 
 Schema::dropView('active_users');
 ```
 
----
+## Raw SQL
 
-#### Raw SQL
-You may execute arbitrary SQL queries using `Schema::raw()`.
 ```php
-// Single query
-Schema::raw('ALTER TABLE users ENGINE=InnoDB');
+Schema::raw('ALTER TABLE wp_users ENGINE=InnoDB');
 
-// Multiple queries may be executed at once:
 Schema::raw([
     'SET FOREIGN_KEY_CHECKS=0',
-    'DROP TABLE legacy',
+    'DROP TABLE IF EXISTS wp_legacy',
     'SET FOREIGN_KEY_CHECKS=1',
 ]);
 ```
 
----
+## Stub Resolution
 
-### Migration stubs
-Migration stubs are selected automatically based on migration name prefix:
-- create_* → create stub
-- update_* → update stub
-- rename_* → rename stub
-- drop_*   → drop stub
+`wp migrations add` selects a stub by migration prefix:
+- `create_*` -> `create.stub.php`
+- `update_*` -> `update.stub.php`
+- `rename_*` -> `rename.stub.php`
+- `drop_*` -> `drop.stub.php`
+- otherwise -> `default.stub.php`
 
-If no keyword is detected, the default stub is used.
+Stub lookup order:
+1. `WP_MIGRATIONS_STUB_PATH`
+2. `<theme>/migrations/stubs`
+3. package `stubs/`
 
+Publish stubs into project:
 
-### Stub publishing
-You need do define the `WP_MIGRATIONS_STUBS_PATH` constant.
-To customize migration templates, you can publish the default stubs:
 ```bash
 wp migrations stub:publish
 ```
-This will copy stub files into your project, where they can be freely modified.
 
+## Configuration
 
----
+Path resolution order for migrations:
+1. CLI option `--path`
+2. `WP_MIGRATIONS_PATH`
+3. `<theme>/migrations`
+4. `WP_CONTENT_DIR/migrations`
 
----
+Programmatic runner config:
 
----
-
-## Multisite
-Not supported.
-
-But you may apply schema changes across multiple sites manually
-(e.g. by iterating over `get_sites()` and using `switch_to_blog()`).
-
-In this case, the migration is still considered a single unit.
-Rollback correctness is the responsibility of the migration author.
-
-Example:
 ```php
-public function up() {
-    foreach (get_sites() as $site) {
-        switch_to_blog($site->blog_id);
-    
-        Schema::table('orders', function (Blueprint $table) {
-            $table->string('foo');
-        });
-    
-        restore_current_blog();
-    }
-}
+new WPMigrations\Migrations\MigrationRunner([
+    'path' => '/custom/migrations/path',
+    'table' => 'wp_migrations',
+    // 'strict' => true,
+    // 'connection' => custom ConnectionInterface implementation,
+]);
 ```
 
----
+## Important Notes
 
+- Execution is explicit; there is no schema introspection.
+- Rollback is not transaction-wrapped by default.
+- Write defensive `down()` methods (especially for FK/index/column order).
+- For MySQL, drop foreign keys before dropping dependent indexes/columns.
+- Multisite is not first-class; if you iterate blogs manually, rollback correctness is on migration author.

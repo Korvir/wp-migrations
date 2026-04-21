@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
+## [1.2.1] — 2026-04-21
+
+### Changed
+
+- Reworked `README.md` structure for easier onboarding and day-to-day usage:
+  - clearer Quick Start
+  - command-oriented section layout
+  - explicit options per command
+  - updated configuration and stubs resolution sections
+
+### Documentation
+
+- Restored table format for:
+  - `Column Types`
+  - `Column Modifiers`
+  - `Indexes`
+- Updated migration examples to consistently use `MigrationInterface`.
+- Clarified production behavior for `migrate` (`confirm` by default, `--force` to skip prompt).
+- Aligned docs with current API and command behavior introduced in `1.2.x`.
+
 ## [1.2.0] — 2026-04-21
 
 ### Added
