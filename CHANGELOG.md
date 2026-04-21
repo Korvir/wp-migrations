@@ -6,6 +6,48 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
+## [1.2.0] — 2026-04-21
+
+### Added
+
+- New schema helpers in `Blueprint`:
+  - `increments`
+  - `bigIncrements`
+  - `foreignId`
+  - `dropConstrainedForeignId`
+  - `softDeletes`
+  - `timestampsTz`
+- New migration architecture components:
+  - `MigrationFinder`
+  - `Migrator`
+- New DB abstraction layer:
+  - `ConnectionInterface`
+  - `WPDBConnection`
+  - `MySqlGrammar`
+
+### Changed
+
+- `MigrationRunner` now delegates execution/discovery logic to `Migrator` and `MigrationFinder` (public API preserved).
+- `Schema` now uses connection + grammar layer internally.
+- `wp migrations migrate` supports:
+  - `--path`
+  - `--step`
+  - production confirmation prompt (instead of hard fail) when `--force` is not provided.
+- `wp migrations reset` and `wp migrations fresh` now use correct WP-CLI invocation signature (`$args, $assoc_args`).
+- Migration stubs now consistently implement `MigrationInterface`.
+
+### Fixed
+
+- Fixed placeholder replacement mismatch in generated stubs (`{{table}}`, `{{from}}`, `{{to}}`).
+- Fixed `--except` filter edge case (`strpos(...) === 0`).
+- Added rollback error checks to avoid marking failed `down()` operations as successful.
+- Improved SQL identifier handling/quoting in compiler and schema operations.
+- Improved stub resolution with fallback chain:
+  - `WP_MIGRATIONS_STUB_PATH`
+  - `theme/migrations/stubs`
+  - package `/stubs`
+- Added test infrastructure (PHPUnit) and CI workflow for regression safety.
+
 ### [1.1.0]
 - Schema methods:
   - `raw`,

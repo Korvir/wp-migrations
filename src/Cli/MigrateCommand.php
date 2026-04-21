@@ -72,7 +72,7 @@ class MigrateCommand extends WP_CLI_Command {
 		}
 
 		if ( $this->isProduction() && !isset($assoc_args['force']) ) {
-			WP_CLI::error('Application is in production. Use --force to run migrations.');
+			WP_CLI::confirm('Application is in production. Are you sure you want to run migrations?', $assoc_args);
 		}
 
 		$config = [];
