@@ -6,13 +6,13 @@ use WPMigrations\Schema\Schema;
 
 return new class implements MigrationInterface
 {
-	public function up() {
+	public function up() : void {
 		Schema::table('{{table}}', function( Blueprint $table ) {
 			//
 		});
 	}
 
-	public function down() {
+	public function down() : void {
 		Schema::table('{{table}}', function( Blueprint $table ) {
 			//
 		});

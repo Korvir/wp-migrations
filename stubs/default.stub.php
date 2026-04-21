@@ -6,11 +6,11 @@ use WPMigrations\Schema\Blueprint;
 
 return new class implements MigrationInterface
 {
-	public function up() {
+	public function up() : void  {
 		//
 	}
 
-	public function down() {
+	public function down() : void {
 		//
 	}
 };

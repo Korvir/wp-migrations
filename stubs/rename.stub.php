@@ -5,11 +5,11 @@ use WPMigrations\Schema\Schema;
 
 return new class implements MigrationInterface
 {
-	public function up() {
+	public function up() : void {
 		Schema::rename('{{from}}', '{{to}}');
 	}
 
-	public function down() {
+	public function down() : void {
 		Schema::rename('{{to}}', '{{from}}');
 	}
 };

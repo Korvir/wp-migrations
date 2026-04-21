@@ -7,13 +7,13 @@ use WPMigrations\Schema\Schema;
 return new class implements MigrationInterface
 {
 	
-	public function up() {
+	public function up() : void {
 		Schema::create('{{table}}', function( Blueprint $table ) {
 			$table->id();
 		});
 	}
 	
-	public function down() {
+	public function down() : void {
 		Schema::dropIfExists('{{table}}');
 	}
 	

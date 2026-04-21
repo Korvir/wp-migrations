@@ -56,19 +56,20 @@ class AddMigrationCommand extends WP_CLI_Command {
 		return WP_CONTENT_DIR . '/migrations';
 	}
 
-	protected function getStubPath(): string {
+	protected function getStubPaths(): array {
+		$paths = [];
+
 		if ( defined('WP_MIGRATIONS_STUB_PATH') ) {
-			return rtrim(WP_MIGRATIONS_STUB_PATH, '/');
+			$paths[] = rtrim(WP_MIGRATIONS_STUB_PATH, '/');
 		}
 
 		if ( function_exists('get_stylesheet_directory') ) {
-			$project = get_stylesheet_directory() . '/migrations/stubs';
-			if ( is_dir($project) ) {
-				return $project;
-			}
+			$paths[] = get_stylesheet_directory() . '/migrations/stubs';
 		}
 
-		return dirname(__DIR__, 2) . '/stubs';
+		$paths[] = dirname(__DIR__, 2) . '/stubs';
+
+		return array_values(array_unique($paths));
 	}
 
 	protected function generateFileName( string $name, string $path ): string {
@@ -108,7 +109,15 @@ class AddMigrationCommand extends WP_CLI_Command {
 		];
 		$file = $map[ $prefix ] ?? 'default.stub.php';
 
-		return $this->getStubPath() . '/' . $file;
+		foreach ( $this->getStubPaths() as $path ) {
+			$candidate = $path . '/' . $file;
+			if ( file_exists($candidate) ) {
+				return $candidate;
+			}
+		}
+
+		// Keep deterministic error output from getStub() by returning package candidate.
+		return dirname(__DIR__, 2) . '/stubs/' . $file;
 	}
 
 	protected function buildStubReplacements( string $name ): array {
